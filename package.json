@@ -5,7 +5,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "prepare": "npm run build",
+    "prepare": "node -e \"try { require('typescript'); process.exit(0) } catch(e) { process.exit(1) }\" && npm run build || echo 'Skipping build during initial install because build depends on typescript.'",
     "test": "jest",
     "test:coverage": "jest --coverage",
     "lint": "eslint . --ext .ts",
