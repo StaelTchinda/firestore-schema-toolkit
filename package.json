@@ -1,0 +1,17 @@
+{
+  "name": "firestore-schema-toolkit",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "prepare": "npm run build"
+  },
+  "dependencies": {
+    "@google-cloud/firestore": "^6.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^4.5.0",
+    "@types/node": "^16.0.0"
+  }
+}
