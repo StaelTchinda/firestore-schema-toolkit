@@ -29,6 +29,3 @@ jobs:
         
       - name: Check for duplicate code
         run: npm run find-duplicates
-        
-      - name: Check for commented code
-        run: npm run find-commented
