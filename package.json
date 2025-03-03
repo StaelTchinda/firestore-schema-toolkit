@@ -1,10 +1,11 @@
 {
   "name": "firestore-schema-toolkit",
+  "description": "A NPM package designed to help developers manage and migrate Firestore database schemas with ease.",
   "version": "1.0.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && tsc-alias",
     "test": "jest",
     "test:coverage": "jest --coverage",
     "lint": "eslint . --ext .ts",
@@ -15,8 +16,15 @@
     "quality-check": "npm run lint && npm run unused-exports && npm run find-duplicates && npm run find-commented",
     "prepare-husky": "husky install"
   },
+  "bin": {
+    "firestore-schema": "./dist/src/bin/firestore-schema.js"
+  },
   "dependencies": {
-    "@google-cloud/firestore": "^6.0.0"
+    "@google-cloud/firestore": "^6.0.0",
+    "commander": "^13.1.0",
+    "enquirer": "^2.4.1",
+    "firebase-admin": "^13.1.0",
+    "generate-schema": "^2.6.0"
   },
   "devDependencies": {
     "@types/jest": "^29.5.0",
@@ -32,6 +40,7 @@
     "lint-staged": "^13.2.1",
     "ts-jest": "^29.1.0",
     "ts-prune": "^0.10.3",
+    "tsc-alias": "^1.8.11",
     "typescript": "^4.5.0"
   },
   "lint-staged": {
