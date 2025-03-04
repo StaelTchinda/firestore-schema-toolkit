@@ -82,19 +82,12 @@ export function validateParams(
   }
 
   if (
-    !commandParams.collectionNames) {
+    !commandParams.collectionNames || commandParams.collectionNames.length === 0) {
     throw new Error(
       colors.bold(colors.red("Missing: ")) +
         colors.bold(exportCommandOptions.collectionNames.key) +
         " - " +
         exportCommandOptions.collectionNames.description
-    );
-  } else if (commandParams.collectionNames.length === 0) {
-    throw new Error(
-      colors.bold(colors.red("Invalid: ")) +
-        colors.bold(exportCommandOptions.collectionNames.key) +
-        " - " +
-        "collections must have at least one element"
     );
   }
 
