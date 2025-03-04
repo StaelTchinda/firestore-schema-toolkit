@@ -27,13 +27,13 @@ export const exportCommandOptions: { [key: string]: OptionParams } = {
     shortKey: "o",
     key: "output",
     args: "<path>",
-    description: "path to save the exported data",
+    description: "output path to save the exported data",
   },
   verbose: {
     shortKey: "v",
     key: "verbose",
     args: "",
-    description: "verbose output",
+    description: "enable verbose logging",
   },
 };
 
@@ -81,14 +81,19 @@ export function validateParams(
   }
 
   if (
-    !commandParams.collectionNames ||
-    commandParams.collectionNames.length === 0
-  ) {
+    !commandParams.collectionNames) {
     throw new Error(
       colors.bold(colors.red("Missing: ")) +
         colors.bold(exportCommandOptions.collectionNames.key) +
         " - " +
         exportCommandOptions.collectionNames.description
+    );
+  } else if (commandParams.collectionNames.length === 0) {
+    throw new Error(
+      colors.bold(colors.red("Invalid: ")) +
+        colors.bold(exportCommandOptions.collectionNames.key) +
+        " - " +
+        "collections must have at least one element"
     );
   }
 
