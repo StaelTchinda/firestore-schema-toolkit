@@ -1,8 +1,6 @@
 import dotenv from "dotenv";
 dotenv.config();
 import { Command } from "commander";
-import colors from "colors";
-import process from "process";
 import fs from "fs";
 import JsonSchemaGenrator from "json-schema-generator";
 import { parseParams, validateParams } from "src/bin/firestore-schema/export/params";
@@ -42,16 +40,4 @@ export async function executeAsyncExportCommand(program: Command): Promise<void>
   }
 
   params.verbose && console.log("Export complete");
-}
-
-export function executeSyncExportCommand(program: Command): void {
-  executeAsyncExportCommand(program).catch((error) => {
-    if (error instanceof Error) {
-      console.error(colors.red(`${error.name}: ${error.message}`));
-      console.error(colors.red(error.stack as string));
-      process.exit(1);
-    } else {
-      console.error(colors.red(String(error)));
-    }
-  });
 }
