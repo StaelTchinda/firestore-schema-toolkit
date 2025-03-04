@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 dotenv.config();
 import { Command } from "commander";
 import fs from "fs";
+import colors from "colors";
 import {
   parseParams,
   validateParams,
@@ -58,11 +59,11 @@ export async function executeAsyncValidateCommand(
     const validate = ajv.compile(collectionSchema);
     const valid = validate(collectionData);
     if (valid) {
-      console.log(`✅ Validation succeeded for collection ${collectionName}.`);
+      console.log(colors.bold(colors.green('Validation succeeded')) + ` for collection ${collectionName}.`);
     } else {
       allErrors[collectionName] = validate.errors || [];
       console.error(
-        `❌ Validation failed for collection ${collectionName}: found ${validate.errors?.length} errors.`
+        colors.bold(colors.red('Validation failed')) + ` for collection ${collectionName}: found ${validate.errors?.length} errors.`
       );
       const mergedErrors = mergeValidationErrors(validate.errors || []);
       for (const error of mergedErrors) {
