@@ -4,9 +4,10 @@ import { packageInfo } from "src/lib/utils/bin/common";
 
 interface ProgramParams {
   options: {[key: string]: OptionParams};
+  parse?: boolean; // Default is true
 }
 
-export function setupProgram({options}: ProgramParams): Command {
+export function setupProgram({options, parse = true}: ProgramParams): Command {
   const program = new Command();
   program
     .name(packageInfo.name)
@@ -16,7 +17,9 @@ export function setupProgram({options}: ProgramParams): Command {
   for (const key in options) {
     program.option(...buildOption(options[key]));
   }
-  program.parse(process.argv);
+  if (parse) {
+    program.parse(process.argv);
+  }
 
   return program;
 }

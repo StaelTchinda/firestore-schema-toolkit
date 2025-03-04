@@ -9,7 +9,7 @@ describe('Export Command Parameters', () => {
   let program: Command;
 
   beforeEach(() => {
-    program = setupProgram({ options: exportCommandOptions });
+    program = setupProgram({ options: exportCommandOptions, parse: false });
   });
 
   describe('parseParams', () => {
@@ -40,7 +40,7 @@ describe('Export Command Parameters', () => {
     test('returns empty for options not specified without default values', () => {
       program.parse(['node', 'script.js']);
       const params = parseParams(program);
-      expect(params.collectionNames).toBe([]);
+      expect(params.collectionNames).toEqual([]);
       expect(params.outputPath).toBeUndefined();
     });
 
