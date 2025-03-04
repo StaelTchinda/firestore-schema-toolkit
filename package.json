@@ -5,7 +5,8 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc && tsc-alias",
+    "build": "npm run clean && tsc && tsc-alias",
+    "clean": "rm -rf dist",
     "test": "jest",
     "test:coverage": "jest --coverage",
     "lint": "eslint . --ext .ts",
@@ -22,9 +23,10 @@
   "dependencies": {
     "@google-cloud/firestore": "^6.0.0",
     "commander": "^13.1.0",
+    "dotenv": "^16.4.7",
     "enquirer": "^2.4.1",
     "firebase-admin": "^13.1.0",
-    "generate-schema": "^2.6.0"
+    "json-schema-generator": "^2.0.6"
   },
   "devDependencies": {
     "@types/jest": "^29.5.0",
