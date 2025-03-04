@@ -31,10 +31,20 @@ describe("Validate Command Parameters", () => {
     });
 
     test("parses account credentials path from environment variable", () => {
-      process.env.GOOGLE_APPLICATION_CREDENTIALS = "/path/to/credentials.json";
-      program.parse(["node", "script.js"]);
-      const params = parseParams(program);
-      expect(params.accountCredentialsPath).toBe("/path/to/credentials.json");
+      const originalEnv = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+      try {
+        process.env.GOOGLE_APPLICATION_CREDENTIALS =
+          "/path/to/credentials.json";
+        program.parse(["node", "script.js"]);
+        const params = parseParams(program);
+        expect(params.accountCredentialsPath).toBe("/path/to/credentials.json");
+      } finally {
+        // Clean up environment variable
+        delete process.env.GOOGLE_APPLICATION_CREDENTIALS;
+        if (originalEnv !== undefined) {
+          process.env.GOOGLE_APPLICATION_CREDENTIALS = originalEnv;
+        }
+      }
     });
 
     test("parses collection names as an array", () => {
