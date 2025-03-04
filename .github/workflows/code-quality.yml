@@ -26,6 +26,8 @@ jobs:
         
       - name: Check unused exports with ts-prune
         run: npm run unused-exports
+        if: always()
         
       - name: Check for duplicate code
         run: npm run find-duplicates
+        if: always()
