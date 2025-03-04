@@ -2,9 +2,9 @@ import { Command } from "commander";
 import colors from "colors";
 import fs from "fs";
 import { OptionParams } from "src/lib/utils/bin/option";
-import { 
-  accountCredentialsEnvironmentKey, 
-  defaultAccountCredentialsPath 
+import {
+  accountCredentialsEnvironmentKey,
+  defaultAccountCredentialsPath,
 } from "src/lib/utils/bin/common";
 import { isPathFolder } from "src/lib/utils/file";
 import { FirestoreSchemaExportParams } from "src/bin/firestore-schema/export/types";
@@ -48,7 +48,8 @@ export function parseParams(program: Command): FirestoreSchemaExportParams {
   const collectionNames =
     options[exportCommandOptions.collectionNames.key]
       ?.split(",")
-      .map((collectionName: string) => collectionName.trim()) ?? ([] as string[]);
+      .map((collectionName: string) => collectionName.trim()) ??
+    ([] as string[]);
 
   const outputPath = options[exportCommandOptions.outputPath.key];
 
@@ -66,7 +67,7 @@ export function validateParams(
   commandParams: FirestoreSchemaExportParams
 ): void {
   if (!commandParams.accountCredentialsPath) {
-    console.log(colors.bold)
+    console.log(colors.bold);
     throw new Error(
       colors.bold(colors.red("Missing: ")) +
         colors.bold(exportCommandOptions.accountCredentialsPath.key) +
@@ -81,13 +82,19 @@ export function validateParams(
     );
   }
 
-  if (
-    !commandParams.collectionNames || commandParams.collectionNames.length === 0) {
+  if (!commandParams.collectionNames) {
     throw new Error(
       colors.bold(colors.red("Missing: ")) +
         colors.bold(exportCommandOptions.collectionNames.key) +
         " - " +
         exportCommandOptions.collectionNames.description
+    );
+  } else if (commandParams.collectionNames.length === 0) {
+    throw new Error(
+      colors.bold(colors.red("Invalid: ")) +
+        colors.bold(exportCommandOptions.collectionNames.key) +
+        " - " +
+        "collections must have at least one element"
     );
   }
 
