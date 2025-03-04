@@ -20,7 +20,7 @@ export async function executeAsyncExportCommand(program: Command): Promise<void>
   });
 
   for (const collectionName of params.collectionNames) {
-    params.verbose && console.log(`Exporting collection: ${collectionName}`);
+    params.verbose && console.log(`Importing data for collection: ${collectionName}`);
     const collectionData: unknown[] = await getCollectionDocuments(firestore, collectionName);
 
     params.verbose && console.log(`Generating schema for collection: ${collectionName}`);
