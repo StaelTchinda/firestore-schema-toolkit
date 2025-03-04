@@ -4,7 +4,7 @@ import fs from "fs";
 import { OptionParams } from "src/lib/utils/bin/option";
 import { 
   accountCredentialsEnvironmentKey, 
-  defaultaccountCredentialsPath 
+  defaultAccountCredentialsPath 
 } from "src/lib/utils/bin/common";
 import { isPathFolder } from "src/lib/utils/file";
 import { FirestoreSchemaExportParams } from "src/bin/firestore-schema/export/types";
@@ -14,8 +14,8 @@ export const exportCommandOptions: { [key: string]: OptionParams } = {
     shortKey: "a",
     key: "accountCredentials",
     args: "<path>",
-    description: `path to Google Cloud account credentials JSON file. If missing, will look at the ${accountCredentialsEnvironmentKey} environment variable for the path. Defaults to '${defaultaccountCredentialsPath}' if missing.`,
-    defaultValue: defaultaccountCredentialsPath,
+    description: `path to Google Cloud account credentials JSON file. If missing, will look at the ${accountCredentialsEnvironmentKey} environment variable for the path. Defaults to '${defaultAccountCredentialsPath}' if missing.`,
+    defaultValue: defaultAccountCredentialsPath,
   },
   collectionNames: {
     shortKey: "c",
@@ -42,7 +42,7 @@ export function parseParams(program: Command): FirestoreSchemaExportParams {
 
   const accountCredentialsPath =
     options[exportCommandOptions.accountCredentialsPath.key] ||
-    process.env[process.env.FIREBASE_ACCOUNT_CREDENTIALS as string] ||
+    process.env[accountCredentialsEnvironmentKey] ||
     exportCommandOptions.accountCredentialsPath.defaultValue;
 
   const collectionNames =
