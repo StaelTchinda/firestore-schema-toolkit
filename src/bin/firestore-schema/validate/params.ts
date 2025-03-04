@@ -6,7 +6,7 @@ import {
   accountCredentialsEnvironmentKey, 
   defaultAccountCredentialsPath 
 } from "src/lib/utils/bin/common";
-import { isPathFile, isPathFolder } from "src/lib/utils/file";
+import { isPathFolder } from "src/lib/utils/file";
 import { FirestoreSchemaValidateParams } from "./types";
 
 export const validateCommandOptions: { [key: string]: OptionParams } = {
