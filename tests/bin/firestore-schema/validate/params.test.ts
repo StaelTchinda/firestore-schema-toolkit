@@ -1,12 +1,16 @@
-import { Command } from 'commander';
-import fs from 'fs';
-import colors from 'colors';
-import { parseParams, validateParams, validateCommandOptions } from 'src/bin/firestore-schema/validate/params';
-import { FirestoreSchemaValidateParams } from 'src/bin/firestore-schema/validate/types';
-import { setupProgram } from 'src/lib/utils/bin/program';
-import * as fileUtils from 'src/lib/utils/file';
+import { Command } from "commander";
+import fs from "fs";
+import colors from "colors";
+import {
+  parseParams,
+  validateParams,
+  validateCommandOptions,
+} from "src/bin/firestore-schema/validate/params";
+import { FirestoreSchemaValidateParams } from "src/bin/firestore-schema/validate/types";
+import { setupProgram } from "src/lib/utils/bin/program";
+import * as fileUtils from "src/lib/utils/file";
 
-describe('Validate Command Parameters', () => {
+describe("Validate Command Parameters", () => {
   let program: Command;
 
   beforeEach(() => {
@@ -14,200 +18,247 @@ describe('Validate Command Parameters', () => {
     jest.restoreAllMocks();
   });
 
-  describe('parseParams', () => {
-    test('parses account credentials path', () => {
-      program.parse(['node', 'script.js', '--accountCredentials', '/path/to/credentials.json']);
+  describe("parseParams", () => {
+    test("parses account credentials path", () => {
+      program.parse([
+        "node",
+        "script.js",
+        "--accountCredentials",
+        "/path/to/credentials.json",
+      ]);
       const params = parseParams(program);
-      expect(params.accountCredentialsPath).toBe('/path/to/credentials.json');
+      expect(params.accountCredentialsPath).toBe("/path/to/credentials.json");
     });
 
-    test('parses collection names as an array', () => {
-      program.parse(['node', 'script.js', '--collections', 'users,posts,comments']);
+    test("parses account credentials path from environment variable", () => {
+      process.env.GOOGLE_APPLICATION_CREDENTIALS = "/path/to/credentials.json";
+      program.parse(["node", "script.js"]);
       const params = parseParams(program);
-      expect(params.collectionNames).toEqual(['users', 'posts', 'comments']);
+      expect(params.accountCredentialsPath).toBe("/path/to/credentials.json");
     });
 
-    test('parses output path', () => {
-      program.parse(['node', 'script.js', '--output', '/output/folder']);
+    test("parses collection names as an array", () => {
+      program.parse([
+        "node",
+        "script.js",
+        "--collections",
+        "users,posts,comments",
+      ]);
       const params = parseParams(program);
-      expect(params.outputPath).toBe('/output/folder');
+      expect(params.collectionNames).toEqual(["users", "posts", "comments"]);
     });
 
-    test('parses schema path', () => {
-      program.parse(['node', 'script.js', '--schema', '/schema/path']);
+    test("parses output path", () => {
+      program.parse(["node", "script.js", "--output", "/output/folder"]);
       const params = parseParams(program);
-      expect(params.schemaPath).toBe('/schema/path');
+      expect(params.outputPath).toBe("/output/folder");
     });
 
-    test('parses verbose flag', () => {
-      program.parse(['node', 'script.js', '--verbose']);
+    test("parses schema path", () => {
+      program.parse(["node", "script.js", "--schema", "/schema/path"]);
+      const params = parseParams(program);
+      expect(params.schemaPath).toBe("/schema/path");
+    });
+
+    test("parses verbose flag", () => {
+      program.parse(["node", "script.js", "--verbose"]);
       const params = parseParams(program);
       expect(params.verbose).toBe(true);
     });
 
-    test('parses summarize flag', () => {
-      program.parse(['node', 'script.js', '--summarized']);
+    test("parses summarize flag", () => {
+      program.parse(["node", "script.js", "--summarized"]);
       const params = parseParams(program);
       expect(params.summarize).toBe(true);
     });
 
-    test('returns empty for options not specified without default values', () => {
-      program.parse(['node', 'script.js']);
+    test("returns empty for options not specified without default values", () => {
+      program.parse(["node", "script.js"]);
       const params = parseParams(program);
       expect(params.collectionNames).toEqual([]);
       expect(params.outputPath).toBeUndefined();
       expect(params.schemaPath).toBeUndefined();
     });
 
-    test('returns default values for options with default values', () => {
-      program.parse(['node', 'script.js']);
+    test("returns default values for options with default values", () => {
+      program.parse(["node", "script.js"]);
       const params = parseParams(program);
-      expect(params.accountCredentialsPath).toBe('firebase-export.json');
+      expect(params.accountCredentialsPath).toBe("firebase-export.json");
       expect(params.verbose).toBe(false);
       expect(params.summarize).toBe(false);
     });
   });
 
-  describe('validateParams', () => {
+  describe("validateParams", () => {
     beforeEach(() => {
-      jest.spyOn(fs, 'existsSync').mockImplementation((path: unknown) => {
-        return path === '/path/to/credentials.json';
+      jest.spyOn(fs, "existsSync").mockImplementation((path: unknown) => {
+        return path === "/path/to/credentials.json";
       });
-      jest.spyOn(fileUtils, 'isPathFolder').mockImplementation((path: string) => {
-        return path === '/output/folder' || path === '/schema/folder';
-      });
+      jest
+        .spyOn(fileUtils, "isPathFolder")
+        .mockImplementation((path: string) => {
+          return path === "/output/folder" || path === "/schema/folder";
+        });
     });
 
-    test('accepts valid parameters', () => {
+    test("accepts valid parameters", () => {
       const params = {
-        accountCredentialsPath: '/path/to/credentials.json',
-        collectionNames: ['users'],
-        schemaPath: '/schema/path',
-        outputPath: '/output/path',
+        accountCredentialsPath: "/path/to/credentials.json",
+        collectionNames: ["users"],
+        schemaPath: "/schema/path",
+        outputPath: "/output/path",
         verbose: true,
-        summarize: false
+        summarize: false,
       };
       expect(() => validateParams(params)).not.toThrow();
     });
 
-    test('throws error when accountCredentialsPath is missing', () => {
+    test("throws error when accountCredentialsPath is missing", () => {
       const params = {
-        collectionNames: ['users'],
-        schemaPath: '/schema/path',
-        outputPath: '/output/path'
+        collectionNames: ["users"],
+        schemaPath: "/schema/path",
+        outputPath: "/output/path",
       };
-      expect(() => validateParams(params as FirestoreSchemaValidateParams)).toThrow(colors.bold(colors.red('Missing: ')) + colors.bold('accountCredentials'));
+      expect(() =>
+        validateParams(params as FirestoreSchemaValidateParams)
+      ).toThrow(
+        colors.bold(colors.red("Missing: ")) + colors.bold("accountCredentials")
+      );
     });
 
-    test('throws error when collectionNames is missing', () => {
+    test("throws error when collectionNames is missing", () => {
       const params = {
-        accountCredentialsPath: '/path/to/credentials.json',
-        schemaPath: '/schema/path',
-        outputPath: '/output/path'
+        accountCredentialsPath: "/path/to/credentials.json",
+        schemaPath: "/schema/path",
+        outputPath: "/output/path",
       };
-      expect(() => validateParams(params as FirestoreSchemaValidateParams)).toThrow(colors.bold(colors.red('Missing: ')) + colors.bold('collections'));
+      expect(() =>
+        validateParams(params as FirestoreSchemaValidateParams)
+      ).toThrow(
+        colors.bold(colors.red("Missing: ")) + colors.bold("collections")
+      );
     });
 
-    test('throws error when collectionNames is empty', () => {
+    test("throws error when collectionNames is empty", () => {
       const params = {
-        accountCredentialsPath: '/path/to/credentials.json',
+        accountCredentialsPath: "/path/to/credentials.json",
         collectionNames: [],
-        schemaPath: '/schema/path',
-        outputPath: '/output/path'
+        schemaPath: "/schema/path",
+        outputPath: "/output/path",
       };
-      expect(() => validateParams(params as FirestoreSchemaValidateParams)).toThrow(colors.bold(colors.red('Missing: ')) + colors.bold('collections'));
+      expect(() =>
+        validateParams(params as FirestoreSchemaValidateParams)
+      ).toThrow(
+        colors.bold(colors.red("Missing: ")) + colors.bold("collections")
+      );
     });
 
-    test('throws error when schemaPath is missing', () => {
+    test("throws error when schemaPath is missing", () => {
       const params = {
-        accountCredentialsPath: '/path/to/credentials.json',
-        collectionNames: ['users'],
-        outputPath: '/output/path'
+        accountCredentialsPath: "/path/to/credentials.json",
+        collectionNames: ["users"],
+        outputPath: "/output/path",
       };
-      expect(() => validateParams(params as FirestoreSchemaValidateParams)).toThrow(colors.bold(colors.red('Missing: ')) + colors.bold('output'));
+      expect(() =>
+        validateParams(params as FirestoreSchemaValidateParams)
+      ).toThrow(colors.bold(colors.red("Missing: ")) + colors.bold("output"));
     });
 
-    test('throws error when schema path is not a folder with multiple collections', () => {
-      jest.spyOn(fileUtils, 'isPathFolder').mockImplementation((path: string) => {
-        return path === '/output/folder';
-      });
+    test("throws error when schema path is not a folder with multiple collections", () => {
+      jest
+        .spyOn(fileUtils, "isPathFolder")
+        .mockImplementation((path: string) => {
+          return path === "/output/folder";
+        });
       const params = {
-        accountCredentialsPath: '/path/to/credentials.json',
-        collectionNames: ['users', 'posts'],
-        schemaPath: '/schema/path',
-        outputPath: '/output/folder'
+        accountCredentialsPath: "/path/to/credentials.json",
+        collectionNames: ["users", "posts"],
+        schemaPath: "/schema/path",
+        outputPath: "/output/folder",
       };
-      expect(() => validateParams(params)).toThrow('Schema path must be a folder when validating multiple collections');
+      expect(() => validateParams(params)).toThrow(
+        "Schema path must be a folder when validating multiple collections"
+      );
     });
 
-    test('throws error when output path is not a folder with multiple collections', () => {
-      jest.spyOn(fileUtils, 'isPathFolder').mockImplementation((path: string) => {
-        return path === '/schema/folder';
-      });
+    test("throws error when output path is not a folder with multiple collections", () => {
+      jest
+        .spyOn(fileUtils, "isPathFolder")
+        .mockImplementation((path: string) => {
+          return path === "/schema/folder";
+        });
       const params = {
-        accountCredentialsPath: '/path/to/credentials.json',
-        collectionNames: ['users', 'posts'],
-        schemaPath: '/schema/folder',
-        outputPath: '/output/path'
+        accountCredentialsPath: "/path/to/credentials.json",
+        collectionNames: ["users", "posts"],
+        schemaPath: "/schema/folder",
+        outputPath: "/output/path",
       };
-      expect(() => validateParams(params)).toThrow('Output path must be a folder when validating multiple collections');
+      expect(() => validateParams(params)).toThrow(
+        "Output path must be a folder when validating multiple collections"
+      );
     });
 
-    test('does not throw when output path is not provided', () => {
+    test("does not throw when output path is not provided", () => {
       const params = {
-        accountCredentialsPath: '/path/to/credentials.json',
-        collectionNames: ['users'],
-        schemaPath: '/schema/path',
+        accountCredentialsPath: "/path/to/credentials.json",
+        collectionNames: ["users"],
+        schemaPath: "/schema/path",
       };
-      expect(() => validateParams(params as FirestoreSchemaValidateParams)).not.toThrow();
+      expect(() =>
+        validateParams(params as FirestoreSchemaValidateParams)
+      ).not.toThrow();
     });
-    
-    test('does not throw when verbose and summarize are missing', () => {
+
+    test("does not throw when verbose and summarize are missing", () => {
       const params = {
-        accountCredentialsPath: '/path/to/credentials.json',
-        collectionNames: ['users'],
-        schemaPath: '/schema/path',
-        outputPath: '/output/path'
+        accountCredentialsPath: "/path/to/credentials.json",
+        collectionNames: ["users"],
+        schemaPath: "/schema/path",
+        outputPath: "/output/path",
       };
-      expect(() => validateParams(params as FirestoreSchemaValidateParams)).not.toThrow();
+      expect(() =>
+        validateParams(params as FirestoreSchemaValidateParams)
+      ).not.toThrow();
     });
   });
 
-  describe('validateCommandOptions', () => {
-    test('help output includes account credentials option', () => {
+  describe("validateCommandOptions", () => {
+    test("help output includes account credentials option", () => {
       const helpOutput = program.helpInformation();
-      expect(helpOutput).toContain('-a --accountCredentials <path>');
-      expect(helpOutput).toContain('path to Google Cloud account credentials');
+      expect(helpOutput).toContain("-a --accountCredentials <path>");
+      expect(helpOutput).toContain("path to Google Cloud account credentials");
     });
 
-    test('help output includes collections option', () => {
+    test("help output includes collections option", () => {
       const helpOutput = program.helpInformation();
-      expect(helpOutput).toContain('-c --collections <collection1,collection2,...>');
-      expect(helpOutput).toContain('comma separated list of collection names');
+      expect(helpOutput).toContain(
+        "-c --collections <collection1,collection2,...>"
+      );
+      expect(helpOutput).toContain("comma separated list of collection names");
     });
 
-    test('help output includes output option', () => {
+    test("help output includes output option", () => {
       const helpOutput = program.helpInformation();
-      expect(helpOutput).toContain('-o --output <path>');
-      expect(helpOutput).toContain('output path');
+      expect(helpOutput).toContain("-o --output <path>");
+      expect(helpOutput).toContain("output path");
     });
 
-    test('help output includes schema option', () => {
+    test("help output includes schema option", () => {
       const helpOutput = program.helpInformation();
-      expect(helpOutput).toContain('-s --schema <path>');
-      expect(helpOutput).toContain('path to the JSON schema file');
+      expect(helpOutput).toContain("-s --schema <path>");
+      expect(helpOutput).toContain("path to the JSON schema file");
     });
 
-    test('help output includes verbose option', () => {
+    test("help output includes verbose option", () => {
       const helpOutput = program.helpInformation();
-      expect(helpOutput).toContain('-v --verbose');
-      expect(helpOutput).toContain('verbose output');
+      expect(helpOutput).toContain("-v --verbose");
+      expect(helpOutput).toContain("verbose output");
     });
 
-    test('help output includes summarize option', () => {
+    test("help output includes summarize option", () => {
       const helpOutput = program.helpInformation();
-      expect(helpOutput).toContain('-z --summarized');
-      expect(helpOutput).toContain('summarize the validation results');
+      expect(helpOutput).toContain("-z --summarized");
+      expect(helpOutput).toContain("summarize the validation results");
     });
   });
 });
