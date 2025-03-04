@@ -48,7 +48,7 @@ export function parseParams(program: Command): FirestoreSchemaExportParams {
   const collectionNames =
     options[exportCommandOptions.collectionNames.key]
       ?.split(",")
-      .map((collectionName: string) => collectionName.trim()) || [];
+      .map((collectionName: string) => collectionName.trim()) ?? ([] as string[]);
 
   const outputPath = options[exportCommandOptions.outputPath.key];
 
@@ -66,6 +66,7 @@ export function validateParams(
   commandParams: FirestoreSchemaExportParams
 ): void {
   if (!commandParams.accountCredentialsPath) {
+    console.log(colors.bold)
     throw new Error(
       colors.bold(colors.red("Missing: ")) +
         colors.bold(exportCommandOptions.accountCredentialsPath.key) +
