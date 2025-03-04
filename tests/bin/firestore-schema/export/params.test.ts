@@ -72,7 +72,7 @@ describe('Export Command Parameters', () => {
         collectionNames: ['users'],
         outputPath: '/output/path'
       };
-      expect(() => validateParams(params as FirestoreSchemaExportParams)).toThrow(colors.bold('Missing: accountCredentials'));
+      expect(() => validateParams(params as FirestoreSchemaExportParams)).toThrow(colors.bold(colors.red('Missing: ')) + colors.bold('accountCredentials'));
     });
 
     test('throws error when collectionNames is missing', () => {
@@ -80,7 +80,7 @@ describe('Export Command Parameters', () => {
         accountCredentialsPath: '/path/to/credentials.json',
         outputPath: '/output/path'
       };
-      expect(() => validateParams(params as FirestoreSchemaExportParams)).toThrow('Missing: collections');
+      expect(() => validateParams(params as FirestoreSchemaExportParams)).toThrow(colors.bold(colors.red('Missing: ')) + colors.bold('collections'));
     });
 
     test('throws error when outputPath is missing', () => {
@@ -88,7 +88,7 @@ describe('Export Command Parameters', () => {
         accountCredentialsPath: '/path/to/credentials.json',
         collectionNames: ['users']
       };
-      expect(() => validateParams(params as FirestoreSchemaExportParams)).toThrow('Missing: output');
+      expect(() => validateParams(params as FirestoreSchemaExportParams)).toThrow(colors.bold(colors.red('Missing: ')) + colors.bold('output'));
     });
 
     test('throws error when collectionNames is empty', () => {
