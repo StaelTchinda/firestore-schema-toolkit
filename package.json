@@ -18,10 +18,12 @@
     "prepare-husky": "husky install"
   },
   "bin": {
-    "firestore-schema": "./dist/src/bin/firestore-schema.js"
+    "firestore-schema-export": "./dist/src/bin/firestore-schema/export/index.js",
+    "firestore-schema-validate": "./dist/src/bin/firestore-schema/validate/index.js"
   },
   "dependencies": {
     "@google-cloud/firestore": "^6.0.0",
+    "ajv": "^8.17.1",
     "commander": "^13.1.0",
     "dotenv": "^16.4.7",
     "enquirer": "^2.4.1",
