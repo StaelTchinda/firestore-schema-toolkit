@@ -14,6 +14,7 @@
     "unused-exports": "ts-prune",
     "find-duplicates": "jscpd src/",
     "find-commented": "eslint . --ext .ts --rule 'no-commented-code:1'",
+    "format": "prettier --write .",
     "quality-check": "npm run lint && npm run unused-exports && npm run find-duplicates && npm run find-commented",
     "prepare-husky": "husky install"
   },
