@@ -19,6 +19,13 @@ describe('Export Command Parameters', () => {
       expect(params.accountCredentialsPath).toBe('/path/to/credentials.json');
     });
 
+    test('parses account credentials path from environment variable', () => {
+      process.env.GOOGLE_APPLICATION_CREDENTIALS = '/path/to/credentials.json';
+      program.parse(['node', 'script.js']);
+      const params = parseParams(program);
+      expect(params.accountCredentialsPath).toBe('/path/to/credentials.json');
+    });
+
     test('parses collection names as an array', () => {
       program.parse(['node', 'script.js', '--collections', 'users,posts,comments']);
       const params = parseParams(program);
