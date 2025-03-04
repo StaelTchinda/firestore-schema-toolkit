@@ -4,7 +4,7 @@ import * as firestoreUtils from 'src/lib/utils/firestore';
 import * as fileUtils from 'src/lib/utils/file';
 import { executeAsyncValidateCommand } from 'src/bin/firestore-schema/validate/command';
 import { parseParams, validateParams } from 'src/bin/firestore-schema/validate/params';
-import { Ajv } from 'ajv';
+import { Ajv, ErrorObject, ValidateFunction } from 'ajv';
 import { mergeValidationErrors, mapItemSchemaToCollectionSchema } from 'src/lib/schema/validate';
 
 // Mock dependencies
@@ -129,10 +129,10 @@ describe('Validate Command', () => {
     expect(validateFn).toHaveBeenCalledWith(mockCollectionData);
   });
 
-  /*
+  
   test('writes validation errors to file when validation fails', async () => {
-    const mockErrors = [{ instancePath: '/0/name', keyword: 'type', message: 'must be string' }];
-    const validateFn = jest.fn().mockReturnValue(false);
+    const mockErrors: ErrorObject[] = [{ instancePath: '/0/name', keyword: 'type', message: 'must be string', schemaPath: '#/properties/name/type', params: { type: 'string' } }];
+    const validateFn = jest.fn().mockReturnValue(false) as jest.Mock<ValidateFunction> & ValidateFunction;
     validateFn.errors = mockErrors;
     mockCompile.mockReturnValue(validateFn);
     
@@ -143,9 +143,9 @@ describe('Validate Command', () => {
       JSON.stringify(mockErrors, null, 2)
     );
   });
-  */
+  
 
-  /*
+  
   test('writes summarized validation errors when summarize flag is true', async () => {
     (parseParams as jest.Mock).mockReturnValue({
       accountCredentialsPath: '/path/to/credentials.json',
@@ -156,11 +156,11 @@ describe('Validate Command', () => {
       summarize: true
     });
 
-    const mockErrors = [
+    const mockErrors: ErrorObject[] = [
       { instancePath: '/0/name', keyword: 'type', message: 'must be string', schemaPath: '#/properties/name/type', params: { type: 'string' } },
       { instancePath: '/1/name', keyword: 'type', message: 'must be string', schemaPath: '#/properties/name/type', params: { type: 'string' } }
     ];
-    const validateFn = jest.fn().mockReturnValue(false);
+    const validateFn = jest.fn().mockReturnValue(false) as jest.Mock<ValidateFunction> & ValidateFunction;
     validateFn.errors = mockErrors;
     mockCompile.mockReturnValue(validateFn);
     
@@ -169,11 +169,11 @@ describe('Validate Command', () => {
     // Expect merged errors in output
     const expectedMergedErrors = [{
       instancePath: '/0/name,/1/name',
-      instancePaths: ['/0/name', '/1/name'],
       keyword: 'type',
       message: 'must be string',
       schemaPath: '#/properties/name/type',
-      params: { type: 'string' }
+      params: { type: 'string' },
+      instancePaths: ['/0/name', '/1/name']
     }];
     
     expect(fs.writeFileSync).toHaveBeenCalledWith(
@@ -181,7 +181,7 @@ describe('Validate Command', () => {
       JSON.stringify(expectedMergedErrors, null, 2)
     );
   });
-  */
+  
 
   test('throws error when schema file does not exist', async () => {
     (fs.existsSync as jest.Mock).mockReturnValue(false);
