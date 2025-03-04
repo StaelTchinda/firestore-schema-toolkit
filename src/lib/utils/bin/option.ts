@@ -8,5 +8,3 @@ export interface OptionParams {
 }
 
 export const buildOption = ({shortKey, key, args = '', description}: OptionParams): [string, string] => [`-${shortKey} --${key} ${args}`, description];
-
-
