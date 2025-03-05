@@ -8,9 +8,10 @@ import {
   getCredentialsFromFile,
   initFirestore,
 } from "src/lib/utils/firestore";
-import { MigrationScript, PreviewChange } from "src/types/migrate";
+import { MigrationScript, PreviewChange, PreviewFunction } from "src/types/migrate/change";
 import { registerTsCompiler } from "src/lib/utils/compile";
 import path from "path";
+import { buildPreviewFunction } from "src/lib/migrate/template";
 
 export async function executeAsyncMigrateCommand(
   program: Command
@@ -36,7 +37,13 @@ export async function executeAsyncMigrateCommand(
 
   // Run preview
   params.verbose && console.log(`Running preview`);
-  const changes: PreviewChange[] = await migrationScript.preview(firestore);
+  let migrationPreviewFunction: PreviewFunction;
+  if (migrationScript.changes) {
+    migrationPreviewFunction = await buildPreviewFunction(migrationScript.changes);
+  } else {
+    migrationPreviewFunction = migrationScript.preview as PreviewFunction;
+  }
+  const changes: PreviewChange[] = await migrationPreviewFunction(firestore);
 
   if (changes.length === 0) {
     console.log(`No changes detected, exiting`);
@@ -57,8 +64,9 @@ export async function executeAsyncMigrateCommand(
     return;
   }
 
+  // Run migration
   params.verbose && console.log(`Running migration`);
-  await migrationScript.migrate(firestore);
+  // await migrationScript.migrate(firestore);
 
   params.verbose && console.log(`Migration completed`);
 }

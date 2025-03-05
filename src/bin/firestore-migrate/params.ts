@@ -114,16 +114,18 @@ export async function validateParams(
           error
       );
     }
-    console.log("scriptModule", scriptModule);
-    if (
+
+    if ((
+      typeof scriptModule.changes !== "object"
+    ) && (
       typeof scriptModule.preview !== "function" ||
       typeof scriptModule.migrate !== "function"
-    ) {
+    )) {
       throw new Error(
         colors.bold(colors.red("Invalid: ")) +
           colors.bold(commandParams.scriptPath) +
           " - " +
-          "Migration script must export both 'preview' and 'migrate' functions"
+          "Migration script must export either changes or both 'preview' and 'migrate' functions"
       );
     }
   }
