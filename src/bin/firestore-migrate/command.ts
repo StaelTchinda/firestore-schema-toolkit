@@ -26,8 +26,9 @@ export async function executeAsyncMigrateCommand(
     params.accountCredentialsPath
   );
   params.verbose && console.log("Initializing Firestore client");
-  const firestore = await initFirestore({
+  const inputFirestore = await initFirestore({
     credentials,
+    databaseId: params.inputDatabaseId,
   });
 
   // Dynamically import the migration script
@@ -43,7 +44,7 @@ export async function executeAsyncMigrateCommand(
   } else {
     migrationPreviewFunction = migrationScript.preview as PreviewFunction;
   }
-  const changes: PreviewChange[] = await migrationPreviewFunction(firestore);
+  const changes: PreviewChange[] = await migrationPreviewFunction(inputFirestore);
 
   if (changes.length === 0) {
     console.log(`No changes detected, exiting`);
