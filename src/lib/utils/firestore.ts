@@ -45,6 +45,7 @@ export async function getCollectionDocuments(firestore: FirebaseFirestore.Firest
   return collectionData;
 }
 
+/*
 export async function saveCollectionDocuments(firestore: FirebaseFirestore.Firestore, collectionName: string, documents: DocumentData[]): Promise<void> {
   const batchSize = 500; // Firestore has a limit of 500 operations per transaction
   const chunks = [];
@@ -64,3 +65,4 @@ export async function saveCollectionDocuments(firestore: FirebaseFirestore.Fires
     });
   }
 }
+*/
