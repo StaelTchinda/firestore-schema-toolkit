@@ -30,15 +30,15 @@ export const migrateCommandOptions: { [key: string]: OptionParams } = {
     shortKey: "i",
     key: "input",
     args: "<id>",
-    description: `ID of the Firestore database to migrate data from. Defaults to '${defaultDatabaseId}' if missing.`,
-    defaultValue: defaultDatabaseId
+    description: `ID of the database to migrate data from. Defaults to '${defaultDatabaseId}' if missing.`,
+    defaultValue: defaultDatabaseId,
   },
   outputDatabaseId: {
     shortKey: "o",
     key: "output",
     args: "<id>",
-    description: `ID of the Firestore database to migrate data to. Defaults to '${defaultDatabaseId}' if missing.`,
-    defaultValue: defaultDatabaseId
+    description: `ID of the database to migrate data to. Defaults to '${defaultDatabaseId}' if missing.`,
+    defaultValue: defaultDatabaseId,
   },
   /*
   schemaPath: {
@@ -68,9 +68,13 @@ export function parseParams(program: Command): FirestoreMigrateParams {
 
   // const schemaPath = options[migrateCommandOptions.schemaPath.key];
 
-  const inputDatabaseId = options[migrateCommandOptions.inputDatabaseId.key] || migrateCommandOptions.inputDatabaseId.defaultValue;
+  const inputDatabaseId =
+    options[migrateCommandOptions.inputDatabaseId.key] ||
+    migrateCommandOptions.inputDatabaseId.defaultValue;
 
-  const outputDatabaseId = options[migrateCommandOptions.outputDatabaseId.key] || migrateCommandOptions.outputDatabaseId.defaultValue;
+  const outputDatabaseId =
+    options[migrateCommandOptions.outputDatabaseId.key] ||
+    migrateCommandOptions.outputDatabaseId.defaultValue;
 
   const verbose = Boolean(options[migrateCommandOptions.verbose.key]);
 
@@ -109,6 +113,11 @@ export async function validateParams(
         " - " +
         migrateCommandOptions.scriptPath.description
     );
+  } else if (!fs.existsSync(commandParams.scriptPath)) {
+    throw new Error(
+      colors.bold(colors.red("Script file does not exist: ")) +
+        colors.bold(commandParams.scriptPath)
+    );
   } else if (!isPathFile(commandParams.scriptPath)) {
     throw new Error(
       colors.bold(colors.red("Invalid: ")) +
@@ -116,18 +125,16 @@ export async function validateParams(
         " - " +
         "Script path must be a file"
     );
-  } else if (!fs.existsSync(commandParams.scriptPath)) {
-    throw new Error(
-      colors.bold(colors.red("Script file does not exist: ")) +
-        colors.bold(commandParams.scriptPath)
-    );
   } else {
     let scriptModule;
     try {
-      scriptModule = await import(
-        path.resolve(process.cwd(), commandParams.scriptPath)
+      const scriptResolvedPath = path.resolve(
+        process.cwd(),
+        commandParams.scriptPath
       );
+      scriptModule = await import(scriptResolvedPath);
     } catch (error) {
+      // console.error("Failed to load script", error);
       throw new Error(
         colors.bold(colors.red("Failed to load script: ")) +
           colors.bold(commandParams.scriptPath) +
@@ -136,12 +143,11 @@ export async function validateParams(
       );
     }
 
-    if ((
-      typeof scriptModule.changes !== "object"
-    ) && (
-      typeof scriptModule.preview !== "function" ||
-      typeof scriptModule.migrate !== "function"
-    )) {
+    if (
+      typeof scriptModule.changes !== "object" &&
+      (typeof scriptModule.preview !== "function" ||
+        typeof scriptModule.migrate !== "function")
+    ) {
       throw new Error(
         colors.bold(colors.red("Invalid: ")) +
           colors.bold(commandParams.scriptPath) +
