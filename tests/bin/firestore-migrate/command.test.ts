@@ -23,8 +23,8 @@ jest.mock('src/bin/firestore-migrate/params', () => {
 
 // Create mock migration modules
 const mockMigration1Path = '/path/to/migration.ts';
-const mockMigration2Path = '/path/to/migration1.ts';
-const mockMigration3Path = '/path/to/migration2.ts';
+// const mockMigration2Path = '/path/to/migration1.ts';
+// const mockMigration3Path = '/path/to/migration2.ts';
 
 const mockMigrationFunction = jest.fn().mockResolvedValue({});
 const mockMigrationPreviewFunction = jest.fn();
@@ -34,17 +34,17 @@ const mockMigrationFile = {
   preview: mockMigrationPreviewFunction
 };
 
-const mockMigrationFunction2 = jest.fn().mockResolvedValue({});
-const mockMigrationFile2 = {
-  description: 'Second migration',
-  up: mockMigrationFunction2,
-  preview: jest.fn()
-};
+// const mockMigrationFunction2 = jest.fn().mockResolvedValue({});
+// const mockMigrationFile2 = {
+//   description: 'Second migration',
+//   up: mockMigrationFunction2,
+//   preview: jest.fn()
+// };
 
 // Mock specific migration file paths
 jest.mock('/path/to/migration.ts', () => mockMigrationFile, { virtual: true });
-jest.mock('/path/to/migration1.ts', () => mockMigrationFile, { virtual: true });
-jest.mock('/path/to/migration2.ts', () => mockMigrationFile2, { virtual: true });
+// jest.mock('/path/to/migration1.ts', () => mockMigrationFile, { virtual: true });
+// jest.mock('/path/to/migration2.ts', () => mockMigrationFile2, { virtual: true });
 
 describe('Migrate Command', () => {
   let mockProgram: Command;
