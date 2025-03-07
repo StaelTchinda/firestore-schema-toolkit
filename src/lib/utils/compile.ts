@@ -34,7 +34,5 @@ export async function registerTsCompiler(tsconfigPath?: string) {
       ? JSON.parse(await fs.readFile(absoluteTsConfigPath, "utf-8"))
       : defaultTSConfig;
 
-  logger.debug(`Using ts configuration: ${JSON.stringify(tsConfig)}`);
-
   register(tsConfig);
 }
