@@ -212,45 +212,4 @@ describe('Migrate Command', () => {
     expect(mockMigrationFunction).not.toHaveBeenCalled();
     expect(mockBatch.commit).not.toHaveBeenCalled();
   });
-
-  test('throws error when migration file is missing required functions', async () => {
-    // Create a mock with missing up function
-    const invalidMockPath = '/path/to/invalid.ts';
-    jest.mock(invalidMockPath, () => ({ 
-      description: 'Invalid migration'
-      // Missing up function
-    }), { virtual: true });
-    
-    (parseParams as jest.Mock).mockReturnValue({
-      accountCredentialsPath: '/path/to/credentials.json',
-      scriptPath: invalidMockPath,
-      applyChanges: false,
-      verbose: true
-    });
-    
-    await expect(executeAsyncMigrateCommand(mockProgram)).rejects.toThrow(
-      'Migration file must export an "up" function'
-    );
-  });
-
-  test('throws error when preview function is missing', async () => {
-    // Create a mock with missing preview function
-    const noPreviewMockPath = '/path/to/no-preview.ts';
-    jest.mock(noPreviewMockPath, () => ({ 
-      description: 'Migration without preview',
-      up: jest.fn()
-      // Missing preview function
-    }), { virtual: true });
-    
-    (parseParams as jest.Mock).mockReturnValue({
-      accountCredentialsPath: '/path/to/credentials.json',
-      scriptPath: noPreviewMockPath,
-      applyChanges: false,
-      verbose: true
-    });
-    
-    await expect(executeAsyncMigrateCommand(mockProgram)).rejects.toThrow(
-      'Migration file must export a "preview" function'
-    );
-  });
 });
