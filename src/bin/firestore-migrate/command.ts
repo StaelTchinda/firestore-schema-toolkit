@@ -11,7 +11,7 @@ import {
 import { MigrationScript, PreviewChange, PreviewFunction } from "src/types/migrate/change";
 import { registerTsCompiler } from "src/lib/utils/compile";
 import path from "path";
-import { buildPreviewFunction } from "src/lib/migrate/template";
+import { buildPreviewFunction } from "src/lib/migrate/template/preview";
 import { summarizePreviewChanges } from "src/lib/migrate/summary";
 
 export async function executeAsyncMigrateCommand(

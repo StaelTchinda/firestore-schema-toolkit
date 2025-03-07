@@ -7,7 +7,7 @@ import {
   buildPreviewFunction,
   buildSinglePreviewFunction,
   getNestedValue
-} from "src/lib/migrate/template";
+} from "src/lib/migrate/template/preview";
 import { AttributeChangeTemplate, PreviewChangeTemplate } from "src/types/migrate/change";
 import { ChangeOperationType } from "src/types/migrate/change-type";
 import { DocumentData } from "firebase-admin/firestore";
