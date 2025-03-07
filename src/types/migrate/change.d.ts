@@ -18,6 +18,14 @@ export interface PreviewChange<T extends DocumentData = DocumentData> {
   changes: AttributeChange[]; // Detailed attribute changes
 }
 
+
+export interface PreviewChangeSummaryGroup {
+  collectionPath: string;
+  documentIds: string[];
+  change: Omit<PreviewChange, "documentId">;
+}
+
+
 export interface AttributeChangeTemplate<DocumentType extends DocumentData = DocumentData, AttributeType = unknown> {
   path: string; // Path to the attribute (e.g., "user.address.city")
   operation: ChangeOperationType;
@@ -28,7 +36,7 @@ export interface PreviewChangeTemplate<DocumentType extends DocumentData = Docum
   operation: ChangeOperationType;
   collectionPath: string;
   filter?: (doc: DocumentType) => boolean;
-  changes: AttributeChangeTemplate<DocumentType>[];
+  changes?: AttributeChangeTemplate<DocumentType>[];
 }
 
 export type PreviewFunction = (firestore: Firestore) => Promise<PreviewChange[]>;

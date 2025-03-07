@@ -5,4 +5,5 @@ export interface FirestoreMigrateParams {
   inputDatabaseId: string;
   outputDatabaseId: string;
   verbose?: boolean;
+  summarize?: boolean;
 }

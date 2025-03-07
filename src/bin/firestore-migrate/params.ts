@@ -54,6 +54,12 @@ export const migrateCommandOptions: { [key: string]: OptionParams } = {
     args: "",
     description: "verbose output",
   },
+  summarize: {
+    shortKey: "z",
+    key: "summarize",
+    args: "",
+    description: "summarize output",
+  },
 };
 
 export function parseParams(program: Command): FirestoreMigrateParams {
@@ -78,6 +84,8 @@ export function parseParams(program: Command): FirestoreMigrateParams {
 
   const verbose = Boolean(options[migrateCommandOptions.verbose.key]);
 
+  const summarize = Boolean(options[migrateCommandOptions.summarize.key]);
+
   return {
     accountCredentialsPath,
     scriptPath,
@@ -85,6 +93,7 @@ export function parseParams(program: Command): FirestoreMigrateParams {
     inputDatabaseId,
     outputDatabaseId,
     verbose,
+    summarize,
   };
 }
 

@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config();
 import { Command } from "commander";
-import { prompt } from "enquirer";
+// import { prompt } from "enquirer";
 import { parseParams, validateParams } from "src/bin/firestore-migrate/params";
 import {
   FirebaseCredentials,
@@ -12,6 +12,7 @@ import { MigrationScript, PreviewChange, PreviewFunction } from "src/types/migra
 import { registerTsCompiler } from "src/lib/utils/compile";
 import path from "path";
 import { buildPreviewFunction } from "src/lib/migrate/template";
+import { summarizePreviewChanges } from "src/lib/migrate/summary";
 
 export async function executeAsyncMigrateCommand(
   program: Command
@@ -51,9 +52,36 @@ export async function executeAsyncMigrateCommand(
     return;
   }
   console.log(`Changes detected:`);
-  params.verbose && console.table(changes);
+  if (params.verbose) {
+    if (params.summarize) {
+      const summarizedChanges = summarizePreviewChanges(changes);
+      const prettyChanges = summarizedChanges.map((group) => ({
+        collection: group.collectionPath,
+        count: group.documentIds.length,
+        documents: group.documentIds,
+        operation: group.change.operation,
+        attributes: group.change.changes.map((change) => change.path),
+        attributesOperation: group.change.changes.map((change) => change.operation),
+        attributesBefore: group.change.changes.map((change) => change.oldValue),
+        attributesAfter: group.change.changes.map((change) => change.newValue),
+      }));
+      console.table(prettyChanges);
+    } else {
+      const prettyChanges = changes.map((change) => ({
+        collection: change.collectionPath,
+        document: change.documentId,
+        operation: change.operation,
+        attributes: change.changes.map((change) => change.path),
+        attributesOperation: change.changes.map((change) => change.operation),
+        attributesBefore: change.changes.map((change) => change.oldValue),
+        attributesAfter: change.changes.map((change) => change.newValue),
+      }));
+      console.table(prettyChanges);
+    }
+  }
 
   // Prompt user to confirm migration
+  /*
   const { confirm }: {confirm: boolean} = await prompt({
     type: "confirm",
     name: "confirm",
@@ -64,6 +92,7 @@ export async function executeAsyncMigrateCommand(
     console.log(`Migration cancelled`);
     return;
   }
+    */
 
   // Run migration
   params.verbose && console.log(`Running migration`);
