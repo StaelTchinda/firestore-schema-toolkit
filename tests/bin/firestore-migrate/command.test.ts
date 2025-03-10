@@ -7,6 +7,13 @@ import { parseParams, validateParams } from 'src/bin/firestore-migrate/params';
 import { ChangeOperationType } from 'src/types/migrate/change-type';
 import { PreviewChange } from 'src/types/migrate/change';
 
+// Mock Enquirer for user prompts
+jest.mock('enquirer', () => {
+  return {
+    prompt: jest.fn()
+  };
+});
+
 // Mock dependencies
 jest.mock('path');
 jest.mock('src/lib/utils/firestore');
@@ -21,6 +28,9 @@ jest.mock('src/bin/firestore-migrate/params', () => {
   };
 });
 
+// Import Enquirer after mocking
+import * as Enquirer from 'enquirer';
+
 // Create mock migration modules
 const mockMigration1Path = '/path/to/migration.ts';
 // const mockMigration2Path = '/path/to/migration1.ts';
@@ -30,7 +40,7 @@ const mockMigrationFunction = jest.fn().mockResolvedValue({});
 const mockMigrationPreviewFunction = jest.fn();
 const mockMigrationFile = {
   description: 'Test migration',
-  up: mockMigrationFunction,
+  migrate: mockMigrationFunction,
   preview: mockMigrationPreviewFunction
 };
 
@@ -85,12 +95,14 @@ describe('Migrate Command', () => {
     jest.clearAllMocks();
     mockProgram = new Command();
     
-    // Mock parameter parsing with scriptPath instead of migrationFilePaths
+    // Mock parameter parsing with scriptPath and single databaseId
     (parseParams as jest.Mock).mockReturnValue({
       accountCredentialsPath: '/path/to/credentials.json',
       scriptPath: mockMigration1Path,
+      databaseId: 'test-database',
       applyChanges: false,
-      verbose: true
+      verbose: true,
+      summarize: false
     });
 
     // Mock firestore utilities
@@ -106,6 +118,9 @@ describe('Migrate Command', () => {
     
     // Mock compile utils
     (compileUtils.registerTsCompiler as jest.Mock).mockResolvedValue(undefined);
+
+    // Default mock for user prompt - declining to apply changes
+    (Enquirer.prompt as jest.Mock).mockResolvedValue({ confirm: false });
   });
 
   test('validates parameters', async () => {
@@ -122,6 +137,7 @@ describe('Migrate Command', () => {
     await executeAsyncMigrateCommand(mockProgram);
     expect(firestoreUtils.initFirestore).toHaveBeenCalledWith({
       credentials: mockCredentials,
+      databaseId: 'test-database',
     });
   });
 
@@ -139,8 +155,10 @@ describe('Migrate Command', () => {
     (parseParams as jest.Mock).mockReturnValue({
       accountCredentialsPath: '/path/to/credentials.json',
       scriptPath: mockMigration1Path,
+      databaseId: 'test-database',
       applyChanges: false,
-      verbose: true
+      verbose: true,
+      summarize: false
     });
 
     await executeAsyncMigrateCommand(mockProgram);
@@ -150,31 +168,36 @@ describe('Migrate Command', () => {
     expect(mockBatch.commit).not.toHaveBeenCalled();
   });
 
-  /*
-  test('applies migration when applyChanges is true', async () => {
+  test('applies migration when user confirms', async () => {
     (parseParams as jest.Mock).mockReturnValue({
       accountCredentialsPath: '/path/to/credentials.json',
       scriptPath: mockMigration1Path,
-      applyChanges: true,
-      verbose: true
+      databaseId: 'test-database',
+      verbose: true,
+      summarize: false
     });
+    
+    // Mock user confirming the migration
+    (Enquirer.prompt as jest.Mock).mockResolvedValue({ confirm: true });
 
     await executeAsyncMigrateCommand(mockProgram);
     
     expect(mockMigrationPreviewFunction).toHaveBeenCalledWith(mockFirestore);
     expect(mockMigrationFunction).toHaveBeenCalledWith(mockFirestore);
   });
-  */
 
-  /*
-  // Remove the test for multiple migration files since we can only provide one script path
-  test('applies batch operations when applyChanges is true', async () => {
+  test('applies batch operations when applyChanges is true and user confirms', async () => {
     (parseParams as jest.Mock).mockReturnValue({
       accountCredentialsPath: '/path/to/credentials.json',
       scriptPath: mockMigration1Path,
+      databaseId: 'test-database',
       applyChanges: true,
-      verbose: true
+      verbose: true,
+      summarize: false
     });
+
+    // Mock user confirming the migration
+    (Enquirer.prompt as jest.Mock).mockResolvedValue({ confirm: true });
 
     const mockCollection = {
       doc: jest.fn().mockReturnValue({ id: 'doc1' })
@@ -190,14 +213,15 @@ describe('Migrate Command', () => {
     expect(mockBatch.update).toHaveBeenCalled();
     expect(mockBatch.commit).toHaveBeenCalled();
   });
-  */
 
   test('only previews changes without applying when applyChanges is false', async () => {
     (parseParams as jest.Mock).mockReturnValue({
       accountCredentialsPath: '/path/to/credentials.json',
       scriptPath: mockMigration1Path,
+      databaseId: 'test-database',
       applyChanges: false,
-      verbose: true
+      verbose: true,
+      summarize: false
     });
 
     const mockCollection = {
@@ -211,5 +235,45 @@ describe('Migrate Command', () => {
     expect(mockMigrationPreviewFunction).toHaveBeenCalledWith(mockFirestore);
     expect(mockMigrationFunction).not.toHaveBeenCalled();
     expect(mockBatch.commit).not.toHaveBeenCalled();
+  });
+
+  test('does not apply migration when user declines confirmation', async () => {
+    (parseParams as jest.Mock).mockReturnValue({
+      accountCredentialsPath: '/path/to/credentials.json',
+      scriptPath: mockMigration1Path,
+      databaseId: 'test-database',
+      applyChanges: true,
+      verbose: true,
+      summarize: false
+    });
+
+    // Mock user declining the confirmation
+    (Enquirer.prompt as jest.Mock).mockResolvedValue({ confirm: false });
+
+    await executeAsyncMigrateCommand(mockProgram);
+    
+    expect(mockMigrationPreviewFunction).toHaveBeenCalledWith(mockFirestore);
+    expect(mockMigrationFunction).not.toHaveBeenCalled();
+    expect(mockBatch.commit).not.toHaveBeenCalled();
+  });
+
+  test('asks for user confirmation before applying changes', async () => {
+    (parseParams as jest.Mock).mockReturnValue({
+      accountCredentialsPath: '/path/to/credentials.json',
+      scriptPath: mockMigration1Path,
+      databaseId: 'test-database',
+      applyChanges: true,
+      verbose: true,
+      summarize: false
+    });
+
+    await executeAsyncMigrateCommand(mockProgram);
+    
+    // Verify that the prompt was called with the right parameters
+    expect(Enquirer.prompt).toHaveBeenCalledWith({
+      type: 'confirm',
+      name: 'confirm',
+      message: expect.stringContaining('Do you want to proceed with the migration?')
+    });
   });
 });
