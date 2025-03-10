@@ -1,6 +1,8 @@
-import { Firestore, DocumentData } from "@google-cloud/firestore";
-
-
+import {
+  Firestore,
+  DocumentData,
+  DocumentSnapshot,
+} from "@google-cloud/firestore";
 
 export interface AttributeChange<T = unknown> {
   path: string; // Path to the attribute (e.g., "user.address.city")
@@ -14,10 +16,9 @@ export interface PreviewChange<T extends DocumentData = DocumentData> {
   documentId: string;
   collectionPath: string;
   before?: T; // Optional because it might not exist for CREATE
-  after?: T;  // Optional because it might not exist for DELETE
+  after?: T; // Optional because it might not exist for DELETE
   changes: AttributeChange[]; // Detailed attribute changes
 }
-
 
 export interface PreviewChangeSummaryGroup {
   collectionPath: string;
@@ -25,24 +26,29 @@ export interface PreviewChangeSummaryGroup {
   change: Omit<PreviewChange, "documentId">;
 }
 
-
-export interface AttributeChangeTemplate<DocumentType extends DocumentData = DocumentData, AttributeType = any> {
+export interface AttributeChangeTemplate<
+  DocumentType extends DocumentData = DocumentData,
+  AttributeType = any
+> {
   path: string; // Path to the attribute (e.g., "user.address.city")
   operation: ChangeOperationType;
   value?: AttributeType | ((doc: DocumentType) => Promise<AttributeType>); // For CREATE and UPDATE
 }
 
-export interface PreviewChangeTemplate<DocumentType extends DocumentData = DocumentData> {
+export interface PreviewChangeTemplate<
+  DocumentType extends DocumentData = DocumentData
+> {
   operation: ChangeOperationType;
   collectionPath: string;
-  filter?: (doc: DocumentType) => boolean;
+  filter?: (doc: DocumentSnapshot<DocumentType, DocumentType>) => boolean;
   changes?: AttributeChangeTemplate<DocumentType>[];
 }
 
-export type PreviewFunction = (firestore: Firestore) => Promise<PreviewChange[]>;
+export type PreviewFunction = (
+  firestore: Firestore
+) => Promise<PreviewChange[]>;
 
 export type MigrateFunction = (firestore: Firestore) => Promise<void>;
-
 
 export interface MigrationScript {
   changes?: PreviewChangeTemplate[];

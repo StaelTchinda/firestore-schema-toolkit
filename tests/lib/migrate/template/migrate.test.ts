@@ -8,6 +8,7 @@ import {
 import { ChangeOperationType } from 'src/types/migrate/change-type';
 import { PreviewChangeTemplate } from 'src/types/migrate/change';
 import * as utils from 'src/lib/migrate/template/utils';
+import { DocumentData } from 'firebase-admin/firestore';
 
 // Mock the utility functions
 jest.mock('src/lib/migrate/template/utils', () => ({
@@ -92,7 +93,7 @@ describe('Migration Functions', () => {
       const template: PreviewChangeTemplate = {
         operation: ChangeOperationType.DELETE,
         collectionPath: 'test-collection',
-        filter: (doc) => doc.id === 1
+        filter: (doc) => (doc.data() as DocumentData).id === 1
       };
 
       const migrateFunction = await executeDocumentDelete(template);
@@ -132,7 +133,7 @@ describe('Migration Functions', () => {
       const template: PreviewChangeTemplate = {
         operation: ChangeOperationType.UPDATE,
         collectionPath: 'test-collection',
-        filter: (doc) => doc.id === 1,
+        filter: (doc) => (doc.data() as DocumentData).id === 1,
         changes: [
           {
             operation: ChangeOperationType.UPDATE,

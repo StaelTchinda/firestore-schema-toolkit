@@ -21,7 +21,7 @@ export async function executeDocumentDelete(
     let deletedCount = 0;
 
     for (const doc of docs.docs) {
-      if (_filter(doc.data())) {
+      if (_filter(doc)) {
         batch.delete(doc.ref);
         deletedCount++;
       }
@@ -52,7 +52,7 @@ export async function executeDocumentUpdate(
 
     for (const doc of docs.docs) {
       const docData = doc.data();
-      if (_filter(docData)) {
+      if (_filter(doc)) {
         const attributeChanges = await Promise.all(
           (template?.changes ?? []).map(async (change) => {
             const attributeMigration = await getAttributeChangeBuilder(change);

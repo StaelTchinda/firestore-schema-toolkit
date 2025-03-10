@@ -22,7 +22,7 @@ export async function buildDocumentDeletePreview(
 
     const changes: PreviewChange[] = [];
     for (const doc of docs.docs) {
-      if (_filter(doc.data())) {
+      if (_filter(doc)) {
         changes.push({
           operation: ChangeOperationType.DELETE,
           documentId: doc.id,
@@ -58,7 +58,7 @@ export async function buildDocumentUpdatePreview(
     const changes: PreviewChange[] = [];
     for (const doc of docs.docs) {
       const docData = doc.data();
-      if (_filter(docData)) {
+      if (_filter(doc)) {
         const attributeChanges: AttributeChange[] = await Promise.all(
           (template?.changes ?? []).map(async (change) => {
             const attributeChange = await getAttributeChangeBuilder(change);
@@ -107,7 +107,7 @@ export async function buildDocumentCreatePreview(
     const changes: PreviewChange[] = [];
     for (const doc of docs.docs) {
       const docData = doc.data();
-      if (_filter(docData)) {
+      if (_filter(doc)) {
         const attributeChanges: AttributeChange[] = await Promise.all(
           (template?.changes ?? []).map(async (change) => {
             const attributeChange = await getAttributeChangeBuilder(change);

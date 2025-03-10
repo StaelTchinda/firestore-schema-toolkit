@@ -105,7 +105,7 @@ describe("buildDocumentDeletePreview", () => {
     const template: PreviewChangeTemplate = {
       operation: ChangeOperationType.DELETE,
       collectionPath: "users",
-      filter: (doc) => doc.active === true,
+      filter: (doc) => (doc.data() as DocumentData).active === true,
     };
 
     addMockDocs("users", [
@@ -189,7 +189,7 @@ describe("buildDocumentUpdatePreview", () => {
     const template: PreviewChangeTemplate = {
       operation: ChangeOperationType.UPDATE,
       collectionPath: "users",
-      filter: (doc) => doc.active === true,
+      filter: (doc) => (doc.data() as DocumentData).active === true,
       changes: [
         {
           path: "name",
