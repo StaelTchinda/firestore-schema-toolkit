@@ -26,10 +26,10 @@ export interface PreviewChangeSummaryGroup {
 }
 
 
-export interface AttributeChangeTemplate<DocumentType extends DocumentData = DocumentData, AttributeType = unknown> {
+export interface AttributeChangeTemplate<DocumentType extends DocumentData = DocumentData, AttributeType = any> {
   path: string; // Path to the attribute (e.g., "user.address.city")
   operation: ChangeOperationType;
-  newValue?: AttributeType | ((doc: DocumentType) => Promise<AttributeType>); // For CREATE and UPDATE
+  value?: AttributeType | ((doc: DocumentType) => Promise<AttributeType>); // For CREATE and UPDATE
 }
 
 export interface PreviewChangeTemplate<DocumentType extends DocumentData = DocumentData> {
