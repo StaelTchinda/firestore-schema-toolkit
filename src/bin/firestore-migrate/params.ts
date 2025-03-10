@@ -26,18 +26,11 @@ export const migrateCommandOptions: { [key: string]: OptionParams } = {
     description:
       "path to the migration script file. The script should be a module that exports the function 'preview', and 'migrate'",
   },
-  inputDatabaseId: {
-    shortKey: "i",
-    key: "input",
-    args: "<id>",
-    description: `ID of the database to migrate data from. Defaults to '${defaultDatabaseId}' if missing.`,
-    defaultValue: defaultDatabaseId,
-  },
-  outputDatabaseId: {
-    shortKey: "o",
-    key: "output",
-    args: "<id>",
-    description: `ID of the database to migrate data to. Defaults to '${defaultDatabaseId}' if missing.`,
+  databaseId: {
+    shortKey: "d",
+    key: "database",
+    args: "<databaseId>",
+    description: `ID of the database to migrate data from and to. Defaults to '${defaultDatabaseId}' if missing.`,
     defaultValue: defaultDatabaseId,
   },
   /*
@@ -74,13 +67,9 @@ export function parseParams(program: Command): FirestoreMigrateParams {
 
   // const schemaPath = options[migrateCommandOptions.schemaPath.key];
 
-  const inputDatabaseId =
-    options[migrateCommandOptions.inputDatabaseId.key] ||
-    migrateCommandOptions.inputDatabaseId.defaultValue;
-
-  const outputDatabaseId =
-    options[migrateCommandOptions.outputDatabaseId.key] ||
-    migrateCommandOptions.outputDatabaseId.defaultValue;
+  const databaseId =
+    options[migrateCommandOptions.databaseId.key] ||
+    migrateCommandOptions.databaseId.defaultValue;
 
   const verbose = Boolean(options[migrateCommandOptions.verbose.key]);
 
@@ -90,8 +79,7 @@ export function parseParams(program: Command): FirestoreMigrateParams {
     accountCredentialsPath,
     scriptPath,
     // schemaPath,
-    inputDatabaseId,
-    outputDatabaseId,
+    databaseId,
     verbose,
     summarize,
   };
@@ -166,21 +154,12 @@ export async function validateParams(
     }
   }
 
-  if (!commandParams.inputDatabaseId) {
+  if (!commandParams.databaseId) {
     throw new Error(
       colors.bold(colors.red("Missing: ")) +
-        colors.bold(migrateCommandOptions.inputDatabaseId.key) +
+        colors.bold(migrateCommandOptions.databaseId.key) +
         " - " +
-        migrateCommandOptions.inputDatabaseId.description
-    );
-  }
-
-  if (!commandParams.outputDatabaseId) {
-    throw new Error(
-      colors.bold(colors.red("Missing: ")) +
-        colors.bold(migrateCommandOptions.outputDatabaseId.key) +
-        " - " +
-        migrateCommandOptions.outputDatabaseId.description
+        migrateCommandOptions.databaseId.description
     );
   }
 }

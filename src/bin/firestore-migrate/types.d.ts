@@ -2,8 +2,7 @@ export interface FirestoreMigrateParams {
   accountCredentialsPath: string;
   scriptPath: string;
   // schemaPath: string;
-  inputDatabaseId: string;
-  outputDatabaseId: string;
+  databaseId: string;
   verbose?: boolean;
   summarize?: boolean;
 }

@@ -52,16 +52,10 @@ describe("Migrate Command Parameters", () => {
       expect(params.scriptPath).toBe("/path/to/migration.js");
     });
 
-    test("parses input database ID", () => {
-      program.parse(["node", "script.js", "--input", "input-database"]);
+    test("parses database ID", () => {
+      program.parse(["node", "script.js", "--database", "test-database"]);
       const params = parseParams(program);
-      expect(params.inputDatabaseId).toBe("input-database");
-    });
-
-    test("parses output database ID", () => {
-      program.parse(["node", "script.js", "--output", "output-database"]);
-      const params = parseParams(program);
-      expect(params.outputDatabaseId).toBe("output-database");
+      expect(params.databaseId).toBe("test-database");
     });
 
     test("parses verbose flag", () => {
@@ -70,13 +64,19 @@ describe("Migrate Command Parameters", () => {
       expect(params.verbose).toBe(true);
     });
 
+    test("parses summarize flag", () => {
+      program.parse(["node", "script.js", "--summarize"]);
+      const params = parseParams(program);
+      expect(params.summarize).toBe(true);
+    });
+
     test("returns default values for options with default values", () => {
       program.parse(["node", "script.js"]);
       const params = parseParams(program);
       expect(params.accountCredentialsPath).toBe("firebase-export.json");
-      expect(params.inputDatabaseId).toBe("(default)");
-      expect(params.outputDatabaseId).toBe("(default)");
+      expect(params.databaseId).toBe("(default)");
       expect(params.verbose).toBe(false);
+      expect(params.summarize).toBe(false);
     });
 
     test("returns undefined for options not specified without default values", () => {
@@ -157,9 +157,9 @@ describe("Migrate Command Parameters", () => {
       const params = {
         accountCredentialsPath: "/path/to/credentials.json",
         scriptPath: "/path/to/valid-script.js",
-        inputDatabaseId: "input-db",
-        outputDatabaseId: "output-db",
+        databaseId: "test-db",
         verbose: true,
+        summarize: false,
       };
       await expect(validateParams(params)).resolves.not.toThrow();
     });
@@ -168,9 +168,9 @@ describe("Migrate Command Parameters", () => {
       const params = {
         accountCredentialsPath: "/path/to/credentials.json",
         scriptPath: "/path/to/valid-changes-script.js",
-        inputDatabaseId: "input-db",
-        outputDatabaseId: "output-db",
+        databaseId: "test-db",
         verbose: true,
+        summarize: false,
       };
       await expect(validateParams(params)).resolves.not.toThrow();
     });
@@ -178,8 +178,7 @@ describe("Migrate Command Parameters", () => {
     test("throws error when accountCredentialsPath is missing", async () => {
       const params = {
         scriptPath: "/path/to/valid-script.js",
-        inputDatabaseId: "input-db",
-        outputDatabaseId: "output-db",
+        databaseId: "test-db",
       };
       await expect(
         validateParams(params as FirestoreMigrateParams)
@@ -192,8 +191,7 @@ describe("Migrate Command Parameters", () => {
       const params = {
         accountCredentialsPath: "/path/to/nonexistent.json",
         scriptPath: "/path/to/valid-script.js",
-        inputDatabaseId: "input-db",
-        outputDatabaseId: "output-db",
+        databaseId: "test-db",
       };
       await expect(
         validateParams(params as FirestoreMigrateParams)
@@ -205,8 +203,7 @@ describe("Migrate Command Parameters", () => {
     test("throws error when scriptPath is missing", async () => {
       const params = {
         accountCredentialsPath: "/path/to/credentials.json",
-        inputDatabaseId: "input-db",
-        outputDatabaseId: "output-db",
+        databaseId: "test-db",
       };
       await expect(
         validateParams(params as FirestoreMigrateParams)
@@ -219,8 +216,7 @@ describe("Migrate Command Parameters", () => {
       const params = {
         accountCredentialsPath: "/path/to/credentials.json",
         scriptPath: "/path/to/nonexistent.js",
-        inputDatabaseId: "input-db",
-        outputDatabaseId: "output-db",
+        databaseId: "test-db",
       };
       await expect(
         validateParams(params as FirestoreMigrateParams)
@@ -233,8 +229,7 @@ describe("Migrate Command Parameters", () => {
       const params = {
         accountCredentialsPath: "/path/to/credentials.json",
         scriptPath: "/path/to/invalid-script.js",
-        inputDatabaseId: "input-db",
-        outputDatabaseId: "output-db",
+        databaseId: "test-db",
       };
       await expect(
         validateParams(params as FirestoreMigrateParams)
@@ -246,27 +241,14 @@ describe("Migrate Command Parameters", () => {
       );
     });
 
-    test("throws error when inputDatabaseId is missing", async () => {
+    test("throws error when databaseId is missing", async () => {
       const params = {
         accountCredentialsPath: "/path/to/credentials.json",
         scriptPath: "/path/to/valid-script.js",
-        outputDatabaseId: "output-db",
       } as FirestoreMigrateParams;
-      params.inputDatabaseId = undefined as unknown as string;
+      params.databaseId = undefined as unknown as string;
       await expect(validateParams(params)).rejects.toThrow(
-        colors.bold(colors.red("Missing: ")) + colors.bold("input")
-      );
-    });
-
-    test("throws error when outputDatabaseId is missing", async () => {
-      const params = {
-        accountCredentialsPath: "/path/to/credentials.json",
-        scriptPath: "/path/to/valid-script.js",
-        inputDatabaseId: "input-db",
-      } as FirestoreMigrateParams;
-      params.outputDatabaseId = undefined as unknown as string;
-      await expect(validateParams(params)).rejects.toThrow(
-        colors.bold(colors.red("Missing: ")) + colors.bold("output")
+        colors.bold(colors.red("Missing: ")) + colors.bold("database")
       );
     });
 
@@ -274,8 +256,16 @@ describe("Migrate Command Parameters", () => {
       const params = {
         accountCredentialsPath: "/path/to/credentials.json",
         scriptPath: "/path/to/valid-script.js",
-        inputDatabaseId: "input-db",
-        outputDatabaseId: "output-db",
+        databaseId: "test-db",
+      };
+      await expect(validateParams(params)).resolves.not.toThrow();
+    });
+
+    test("does not throw when summarize is missing", async () => {
+      const params = {
+        accountCredentialsPath: "/path/to/credentials.json",
+        scriptPath: "/path/to/valid-script.js",
+        databaseId: "test-db",
       };
       await expect(validateParams(params)).resolves.not.toThrow();
     });
@@ -294,22 +284,22 @@ describe("Migrate Command Parameters", () => {
       expect(helpOutput).toContain("path to the migration script file");
     });
 
-    test("help output includes input database option", () => {
+    test("help output includes database option", () => {
       const helpOutput = program.helpInformation();
-      expect(helpOutput).toContain("-i --input <id>");
-      expect(helpOutput).toContain("ID of the database to migrate data from");
-    });
-
-    test("help output includes output database option", () => {
-      const helpOutput = program.helpInformation();
-      expect(helpOutput).toContain("-o --output <id>");
-      expect(helpOutput).toContain("ID of the database to migrate data to");
+      expect(helpOutput).toContain("-d --database <databaseId>");
+      expect(helpOutput).toContain("ID of the database to migrate data");
     });
 
     test("help output includes verbose option", () => {
       const helpOutput = program.helpInformation();
       expect(helpOutput).toContain("-v --verbose");
       expect(helpOutput).toContain("verbose output");
+    });
+
+    test("help output includes summarize option", () => {
+      const helpOutput = program.helpInformation();
+      expect(helpOutput).toContain("-z --summarize");
+      expect(helpOutput).toContain("summarize output");
     });
   });
 });
