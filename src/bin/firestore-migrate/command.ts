@@ -1,18 +1,19 @@
 import dotenv from "dotenv";
 dotenv.config();
 import { Command } from "commander";
-// import { prompt } from "enquirer";
+import { prompt } from "enquirer";
 import { parseParams, validateParams } from "src/bin/firestore-migrate/params";
 import {
   FirebaseCredentials,
   getCredentialsFromFile,
   initFirestore,
 } from "src/lib/utils/firestore";
-import { MigrationScript, PreviewChange, PreviewFunction } from "src/types/migrate/change";
+import { MigrateFunction, MigrationScript, PreviewChange, PreviewFunction } from "src/types/migrate/change";
 import { registerTsCompiler } from "src/lib/utils/compile";
 import path from "path";
 import { buildPreviewFunction } from "src/lib/migrate/template/preview";
 import { summarizePreviewChanges } from "src/lib/migrate/summary";
+import { buildMigrateFunction } from "src/lib/migrate/template/migrate";
 
 export async function executeAsyncMigrateCommand(
   program: Command
@@ -27,9 +28,9 @@ export async function executeAsyncMigrateCommand(
     params.accountCredentialsPath
   );
   params.verbose && console.log("Initializing Firestore client");
-  const inputFirestore = await initFirestore({
+  const firestore = await initFirestore({
     credentials,
-    databaseId: params.inputDatabaseId,
+    databaseId: params.databaseId,
   });
 
   // Dynamically import the migration script
@@ -39,13 +40,13 @@ export async function executeAsyncMigrateCommand(
 
   // Run preview
   params.verbose && console.log(`Running preview`);
-  let migrationPreviewFunction: PreviewFunction;
+  let previewFunction: PreviewFunction;
   if (migrationScript.changes) {
-    migrationPreviewFunction = await buildPreviewFunction(migrationScript.changes);
+    previewFunction = await buildPreviewFunction(migrationScript.changes);
   } else {
-    migrationPreviewFunction = migrationScript.preview as PreviewFunction;
+    previewFunction = migrationScript.preview as PreviewFunction;
   }
-  const changes: PreviewChange[] = await migrationPreviewFunction(inputFirestore);
+  const changes: PreviewChange[] = await previewFunction(firestore);
 
   if (changes.length === 0) {
     console.log(`No changes detected, exiting`);
@@ -81,7 +82,6 @@ export async function executeAsyncMigrateCommand(
   }
 
   // Prompt user to confirm migration
-  /*
   const { confirm }: {confirm: boolean} = await prompt({
     type: "confirm",
     name: "confirm",
@@ -92,11 +92,18 @@ export async function executeAsyncMigrateCommand(
     console.log(`Migration cancelled`);
     return;
   }
-    */
+  
 
   // Run migration
+  params.verbose && console.log(`Running preview`);
+  let migrateFunction: MigrateFunction;
+  if (migrationScript.changes) {
+    migrateFunction = await buildMigrateFunction(migrationScript.changes);
+  } else {
+    migrateFunction = migrationScript.migrate as MigrateFunction;
+  }  
   params.verbose && console.log(`Running migration`);
-  // await migrationScript.migrate(firestore);
+  await migrateFunction(firestore);
 
   params.verbose && console.log(`Migration completed`);
 }
