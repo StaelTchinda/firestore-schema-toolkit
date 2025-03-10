@@ -41,7 +41,7 @@ export interface PreviewChangeTemplate<DocumentType extends DocumentData = Docum
 
 export type PreviewFunction = (firestore: Firestore) => Promise<PreviewChange[]>;
 
-export type MigrateFunction = (firestore: Firestore) => Promise<DocumentData[]>;
+export type MigrateFunction = (firestore: Firestore) => Promise<void>;
 
 
 export interface MigrationScript {
