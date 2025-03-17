@@ -8,14 +8,14 @@ import {
 } from "src/lib/migrate/template/preview";
 import { PreviewChangeTemplate } from "src/types/migrate/change";
 import { ChangeOperationType } from "src/types/migrate/change-type";
-import { DocumentData } from "firebase-admin/firestore";
+import type { DocumentData, DocumentSnapshot } from "firebase-admin/firestore";
 
 // Mock Firestore implementation
 const mockCollection = jest.fn();
 const mockGet = jest.fn();
 
 // Change mockDocs to a map of collections
-const mockCollections: Record<string, DocumentData[]> = {};
+const mockCollections: Record<string, Array<{ id: string; data: DocumentData }>> = {};
 
 const mockFirestore = {
   collection: mockCollection,
@@ -30,12 +30,17 @@ beforeEach(() => {
   });
 
   // Setup default mocks
-  mockCollection.mockImplementation((collectionPath) => {
+  mockCollection.mockImplementation((collectionPath: string) => {
     return {
-      get: async () => ({
+      get: async (): Promise<{
+        docs: Array<{
+          id: string;
+          data: () => DocumentData;
+        }>;
+      }> => ({
         docs: (mockCollections[collectionPath] || []).map((doc) => ({
           id: doc.id,
-          data: () => doc.data,
+          data: (): DocumentData => doc.data,
         })),
       }),
     };
@@ -47,7 +52,7 @@ beforeEach(() => {
     return {
       docs: (mockCollections[collectionPath] || []).map((doc) => ({
         id: doc.id,
-        data: () => doc.data,
+        data: (): DocumentData => doc.data,
       })),
     };
   });
@@ -56,7 +61,7 @@ beforeEach(() => {
 // Helper function to add mock documents to a specific collection
 function addMockDocs(
   collectionPath: string,
-  docs: Array<{ id: string; data: any }>
+  docs: Array<{ id: string; data: DocumentData }>
 ): void {
   if (!mockCollections[collectionPath]) {
     mockCollections[collectionPath] = [];
@@ -105,7 +110,7 @@ describe("buildDocumentDeletePreview", () => {
     const template: PreviewChangeTemplate = {
       operation: ChangeOperationType.DELETE,
       collectionPath: "users",
-      filter: (doc) => (doc.data() as DocumentData).active === true,
+      filter: (doc: DocumentSnapshot) => doc.data()?.active === true,
     };
 
     addMockDocs("users", [
@@ -189,7 +194,7 @@ describe("buildDocumentUpdatePreview", () => {
     const template: PreviewChangeTemplate = {
       operation: ChangeOperationType.UPDATE,
       collectionPath: "users",
-      filter: (doc) => (doc.data() as DocumentData).active === true,
+      filter: (doc: DocumentSnapshot) => doc.data()?.active === true,
       changes: [
         {
           path: "name",
