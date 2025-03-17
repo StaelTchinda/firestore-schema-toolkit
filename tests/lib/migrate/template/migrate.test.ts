@@ -8,7 +8,7 @@ import {
 import { ChangeOperationType } from 'src/types/migrate/change-type';
 import { PreviewChangeTemplate } from 'src/types/migrate/change';
 import * as utils from 'src/lib/migrate/template/utils';
-import { DocumentData } from 'firebase-admin/firestore';
+import { DocumentData, Firestore, CollectionReference, WriteBatch, DocumentReference, QueryDocumentSnapshot } from 'firebase-admin/firestore';
 
 // Mock the utility functions
 jest.mock('src/lib/migrate/template/utils', () => ({
@@ -17,12 +17,11 @@ jest.mock('src/lib/migrate/template/utils', () => ({
 }));
 
 describe('Migration Functions', () => {
-  let mockFirestore: any;
-  let mockCollection: any;
-  let mockBatch: any;
-  let mockDocs: any;
-  let mockDoc: any;
-  let mockDocRef: any;
+  let mockFirestore: Partial<Firestore>;
+  let mockCollection: Partial<CollectionReference>;
+  let mockBatch: Partial<WriteBatch>;
+  let mockDocs: Array<Partial<QueryDocumentSnapshot>>;
+  let mockDocRef: Partial<DocumentReference>;
 
   beforeEach(() => {
     // Reset mocks
@@ -41,12 +40,12 @@ describe('Migration Functions', () => {
     
     mockDocs = [
       {
-        data: () => ({ id: 1, name: 'Test 1' }),
-        ref: { id: 'doc1' }
+        data: (): DocumentData => ({ id: 1, name: 'Test 1' }),
+        ref: { id: 'doc1' } as DocumentReference
       },
       {
-        data: () => ({ id: 2, name: 'Test 2' }),
-        ref: { id: 'doc2' }
+        data: (): DocumentData => ({ id: 2, name: 'Test 2' }),
+        ref: { id: 'doc2' } as DocumentReference
       }
     ];
     
@@ -61,7 +60,7 @@ describe('Migration Functions', () => {
     };
     
     // Mock the attribute change builder to return some sample changes
-    (utils.getAttributeChangeBuilder as jest.Mock).mockImplementation((change) => async (data: any) => {
+    (utils.getAttributeChangeBuilder as jest.Mock).mockImplementation((change) => async (data: DocumentData): Promise<any> => {
       if (change.operation === ChangeOperationType.CREATE) {
         return {
           operation: ChangeOperationType.CREATE,
@@ -97,7 +96,7 @@ describe('Migration Functions', () => {
       };
 
       const migrateFunction = await executeDocumentDelete(template);
-      await migrateFunction(mockFirestore);
+      await migrateFunction(mockFirestore as Firestore);
 
       expect(mockFirestore.collection).toHaveBeenCalledWith('test-collection');
       expect(mockBatch.delete).toHaveBeenCalledTimes(1);
@@ -112,7 +111,7 @@ describe('Migration Functions', () => {
       };
 
       const migrateFunction = await executeDocumentDelete(template);
-      await migrateFunction(mockFirestore);
+      await migrateFunction(mockFirestore as Firestore);
 
       expect(mockBatch.delete).not.toHaveBeenCalled();
       expect(mockBatch.commit).not.toHaveBeenCalled();
@@ -144,7 +143,7 @@ describe('Migration Functions', () => {
       };
 
       const migrateFunction = await executeDocumentUpdate(template);
-      await migrateFunction(mockFirestore);
+      await migrateFunction(mockFirestore as Firestore);
 
       expect(mockFirestore.collection).toHaveBeenCalledWith('test-collection');
       expect(utils.getAttributeChangeBuilder).toHaveBeenCalled();
@@ -192,7 +191,7 @@ describe('Migration Functions', () => {
       };
 
       const migrateFunction = await executeDocumentCreate(template);
-      await migrateFunction(mockFirestore);
+      await migrateFunction(mockFirestore as Firestore);
 
       expect(mockFirestore.collection).toHaveBeenCalledWith('test-collection');
       expect(mockCollection.doc).toHaveBeenCalled();
@@ -274,7 +273,7 @@ describe('Migration Functions', () => {
       ];
 
       const migrateFunction = await buildMigrateFunction(templates);
-      await migrateFunction(mockFirestore);
+      await migrateFunction(mockFirestore as Firestore);
 
       // We can't directly verify the order, but we can verify the function completes
       // and the collection was accessed the expected number of times
