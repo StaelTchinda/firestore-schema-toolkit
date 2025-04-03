@@ -5,7 +5,7 @@ import fs from "fs";
 import JsonSchemaGenrator from "json-schema-generator";
 import { parseParams, validateParams } from "src/bin/firestore-schema/export/params";
 import { isPathFolder } from "src/lib/utils/file";
-import { FirebaseCredentials, getCredentialsFromFile, initFirestore, getCollectionDocuments } from "src/lib/utils/firestore";
+import { FirebaseCredentials, getCredentialsFromFile, initFirestore, getCollectionDocuments, getAllCollectionNames } from "src/lib/utils/firestore";
 
 export async function executeAsyncExportCommand(program: Command): Promise<void> {
   const params = parseParams(program);
@@ -19,7 +19,15 @@ export async function executeAsyncExportCommand(program: Command): Promise<void>
     credentials,
   });
 
-  for (const collectionName of params.collectionNames) {
+  // Get collections based on params
+  let collectionsToExport = params.collectionNames || [];
+  if (params.useAllCollections) {
+    params.verbose && console.log("Fetching all collections from database");
+    collectionsToExport = await getAllCollectionNames(firestore);
+    params.verbose && console.log(`Found ${collectionsToExport.length} collections: ${collectionsToExport.join(', ')}`);
+  }
+
+  for (const collectionName of collectionsToExport) {
     params.verbose && console.log(`Importing data for collection: ${collectionName}`);
     const collectionData: unknown[] = await getCollectionDocuments(firestore, collectionName);
 

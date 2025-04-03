@@ -53,6 +53,13 @@ describe('Export Command Parameters', () => {
       expect(params.verbose).toBe(true);
     });
 
+    test("parses useAllCollections flag", () => {
+      program.parse(["node", "script.js", "--allCollections"]);
+      const params = parseParams(program);
+      expect(params.useAllCollections).toBe(true);
+    });
+
+
     test('returns empty for options not specified without default values', () => {
       program.parse(['node', 'script.js']);
       const params = parseParams(program);
@@ -107,13 +114,59 @@ describe('Export Command Parameters', () => {
       expect(() => validateParams(params as FirestoreSchemaExportParams)).toThrow(colors.bold(colors.red('Missing: ')) + colors.bold('output'));
     });
 
+    test("does not throw when useAllCollections is set and collectionNames is provided, and output path is a folder", () => {
+      const lstatSpy = jest.spyOn(fs, 'lstatSync').mockImplementation((path: unknown) => {
+        return {
+          isDirectory: () => path === '/output/path/folder',
+          isFile: () => false,
+        } as unknown as fs.Stats;
+      });
+      const params = {
+        accountCredentialsPath: "/path/to/credentials.json",
+        collectionNames: ["users"],
+        schemaPath: "/schema/path",
+        outputPath: "/output/path/folder",
+        useAllCollections: true,
+      };
+      expect(() => validateParams(params)).not.toThrow();
+      lstatSpy.mockRestore();
+    });
+
+    test("throws warning when both useAllCollections and collectionNames are set, and output path is a folder", () => {
+      const lstatSpy = jest.spyOn(fs, 'lstatSync').mockImplementation((path: unknown) => {
+        return {
+          isDirectory: () => path === '/output/path/folder',
+          isFile: () => false,
+        } as unknown as fs.Stats;
+      });
+      const params = {
+        accountCredentialsPath: "/path/to/credentials.json",
+        collectionNames: ["users"],
+        schemaPath: "/schema/path",
+        outputPath: "/output/path/folder",
+        useAllCollections: true,
+      };
+      const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+      validateParams(params);
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        expect.stringContaining("Both allCollections and collections are set.")
+      );
+      lstatSpy.mockRestore();
+      consoleWarnSpy.mockRestore();
+    });
+
+
     test('throws error when collectionNames is empty', () => {
       const params = {
         accountCredentialsPath: '/path/to/credentials.json',
         collectionNames: [],
         outputPath: '/output/path'
       };
-      expect(() => validateParams(params as FirestoreSchemaExportParams)).toThrow('collections must have at least one element');
+      expect(() =>
+        validateParams(params as FirestoreSchemaExportParams)
+      ).toThrow(
+        colors.bold(colors.red("Missing: ")) + colors.bold("collections")
+      );
     });
 
     test('does not throw when verbose is missing', () => {
