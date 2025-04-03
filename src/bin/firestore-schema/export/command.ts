@@ -35,7 +35,7 @@ export async function executeAsyncExportCommand(program: Command): Promise<void>
     const parsedCollectionData = parseNestedDocumentReferenceToSimpleObject(collectionData);
 
     params.verbose && console.log(`Generating schema for collection: ${collectionName}`);
-    const collectionSchema = JsonSchemaGenrator(collectionData);
+    const collectionSchema = JsonSchemaGenrator(parsedCollectionData);
     if (!collectionSchema || !collectionSchema["items"]) {
       throw new Error(
         `Failed to generate schema for collection: ${collectionName}. Collection is empty or has no schema.`
