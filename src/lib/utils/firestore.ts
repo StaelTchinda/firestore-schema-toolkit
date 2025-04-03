@@ -44,3 +44,8 @@ export async function getCollectionDocuments(firestore: FirebaseFirestore.Firest
   });
   return collectionData;
 }
+
+export async function getAllCollectionNames(firestore: FirebaseFirestore.Firestore): Promise<string[]> {
+  const collections = await firestore.listCollections();
+  return collections.map(collection => collection.id);
+}
