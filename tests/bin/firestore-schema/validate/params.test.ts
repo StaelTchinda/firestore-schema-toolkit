@@ -82,6 +82,12 @@ describe("Validate Command Parameters", () => {
       expect(params.summarize).toBe(true);
     });
 
+    test("parses useAllCollections flag", () => {
+      program.parse(["node", "script.js", "--allCollections"]);
+      const params = parseParams(program);
+      expect(params.useAllCollections).toBe(true);
+    });
+
     test("returns empty for options not specified without default values", () => {
       program.parse(["node", "script.js"]);
       const params = parseParams(program);
@@ -161,6 +167,33 @@ describe("Validate Command Parameters", () => {
       ).toThrow(
         colors.bold(colors.red("Missing: ")) + colors.bold("collections")
       );
+    });
+
+    test("does not throw when useAllCollections is set and collectionNames is provided", () => {
+      const params = {
+        accountCredentialsPath: "/path/to/credentials.json",
+        collectionNames: ["users"],
+        schemaPath: "/schema/path",
+        outputPath: "/output/path",
+        useAllCollections: true,
+      };
+      expect(() => validateParams(params)).not.toThrow();
+    });
+
+    test("throws warning when both useAllCollections and collectionNames are set", () => {
+      const params = {
+        accountCredentialsPath: "/path/to/credentials.json",
+        collectionNames: ["users"],
+        schemaPath: "/schema/path",
+        outputPath: "/output/path",
+        useAllCollections: true,
+      };
+      const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+      validateParams(params);
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        expect.stringContaining("Both allCollections and collections are set.")
+      );
+      consoleWarnSpy.mockRestore();
     });
 
     test("throws error when schemaPath is missing", () => {
