@@ -5,7 +5,7 @@ import fs from "fs";
 import JsonSchemaGenrator from "json-schema-generator";
 import { parseParams, validateParams } from "src/bin/firestore-schema/export/params";
 import { isPathFolder } from "src/lib/utils/file";
-import { FirebaseCredentials, getCredentialsFromFile, initFirestore, getCollectionDocuments, getAllCollectionNames } from "src/lib/utils/firestore";
+import { FirebaseCredentials, getCredentialsFromFile, initFirestore, getCollectionDocuments, getAllCollectionNames, parseNestedDocumentReferenceToSimpleObject } from "src/lib/utils/firestore";
 
 export async function executeAsyncExportCommand(program: Command): Promise<void> {
   const params = parseParams(program);
@@ -33,13 +33,14 @@ export async function executeAsyncExportCommand(program: Command): Promise<void>
 
     params.verbose && console.log(`Parsing nested document references for collection: ${collectionName}`);
     const parsedCollectionData = parseNestedDocumentReferenceToSimpleObject(collectionData);
-
+    
     params.verbose && console.log(`Generating schema for collection: ${collectionName}`);
     const collectionSchema = JsonSchemaGenrator(parsedCollectionData);
     if (!collectionSchema || !collectionSchema["items"]) {
-      throw new Error(
+      console.warn(
         `Failed to generate schema for collection: ${collectionName}. Collection is empty or has no schema.`
       );
+      continue;
     }
     const dataSchema = collectionSchema["items"];
 
