@@ -31,6 +31,9 @@ export async function executeAsyncExportCommand(program: Command): Promise<void>
     params.verbose && console.log(`Importing data for collection: ${collectionName}`);
     const collectionData: unknown[] = await getCollectionDocuments(firestore, collectionName);
 
+    params.verbose && console.log(`Parsing nested document references for collection: ${collectionName}`);
+    const parsedCollectionData = parseNestedDocumentReferenceToSimpleObject(collectionData);
+
     params.verbose && console.log(`Generating schema for collection: ${collectionName}`);
     const collectionSchema = JsonSchemaGenrator(collectionData);
     if (!collectionSchema || !collectionSchema["items"]) {
