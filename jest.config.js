@@ -18,4 +18,6 @@ module.exports = {
     },
   },
   coverageReporters: ['lcov', 'text', 'text-summary'],
+  // Adding the setup file to run before tests
+  setupFilesAfterEnv: ['<rootDir>/tests/jest.setup.ts'],
 };
