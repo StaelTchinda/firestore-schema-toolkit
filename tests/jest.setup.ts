@@ -24,7 +24,7 @@ const originalConsole = {
 };
 
 // Helper function to write to log file
-const writeToLog = (type: string, ...args: any[]) => {
+const writeToLog = (type: string, ...args: any[]): void => {
   const message = args.map(arg => 
     typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
   ).join(' ');
