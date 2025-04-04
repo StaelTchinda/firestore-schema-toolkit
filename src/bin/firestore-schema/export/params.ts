@@ -23,6 +23,12 @@ export const exportCommandOptions: { [key: string]: OptionParams } = {
     args: "<collection1,collection2,...>",
     description: "comma separated list of collection names to export",
   },
+  useAllCollections: {
+    shortKey: "A",
+    key: "allCollections",
+    args: "",
+    description: "use all collections from the database, ignores collections option",
+  },
   outputPath: {
     shortKey: "o",
     key: "output",
@@ -51,6 +57,8 @@ export function parseParams(program: Command): FirestoreSchemaExportParams {
       .map((collectionName: string) => collectionName.trim()) ??
     ([] as string[]);
 
+  const useAllCollections = Boolean(options[exportCommandOptions.useAllCollections.key]);
+
   const outputPath = options[exportCommandOptions.outputPath.key];
 
   const verbose = Boolean(options[exportCommandOptions.verbose.key]);
@@ -58,6 +66,7 @@ export function parseParams(program: Command): FirestoreSchemaExportParams {
   return {
     accountCredentialsPath,
     collectionNames,
+    useAllCollections,
     outputPath,
     verbose,
   };
@@ -82,14 +91,16 @@ export function validateParams(
     );
   }
 
-  if (!commandParams.collectionNames) {
+  if (!commandParams.useAllCollections &&
+      (!commandParams.collectionNames || commandParams.collectionNames.length === 0)) {
     throw new Error(
       colors.bold(colors.red("Missing: ")) +
         colors.bold(exportCommandOptions.collectionNames.key) +
         " - " +
-        exportCommandOptions.collectionNames.description
+        exportCommandOptions.collectionNames.description +
+        " or use --" + exportCommandOptions.useAllCollections.key
     );
-  } else if (commandParams.collectionNames.length === 0) {
+  } else if (!commandParams.useAllCollections && commandParams.collectionNames && commandParams.collectionNames.length === 0) {
     throw new Error(
       colors.bold(colors.red("Invalid: ")) +
         colors.bold(exportCommandOptions.collectionNames.key) +
@@ -106,7 +117,9 @@ export function validateParams(
         exportCommandOptions.outputPath.description
     );
   } else if (
-    commandParams.collectionNames.length > 1 &&
+    ((commandParams.collectionNames && 
+    commandParams.collectionNames.length > 1) ||
+    commandParams.useAllCollections) &&
     !isPathFolder(commandParams.outputPath)
   ) {
     throw new Error(
@@ -114,6 +127,16 @@ export function validateParams(
         colors.bold(exportCommandOptions.outputPath.key) +
         " - " +
         "Output path must be a folder when exporting multiple collections"
+    );
+  }
+
+  if (commandParams.useAllCollections && 
+      commandParams.collectionNames && 
+      commandParams.collectionNames.length > 0) {
+    console.warn(
+      colors.bold(colors.yellow("Warning: ")) +
+      `Both ${exportCommandOptions.useAllCollections.key} and ${exportCommandOptions.collectionNames.key} are set. ` +
+      `The ${exportCommandOptions.collectionNames.key} parameter will be ignored.`
     );
   }
 }
