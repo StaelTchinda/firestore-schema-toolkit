@@ -1,4 +1,4 @@
-// Import mock class before any imports to avoid hoisting issues
+// Note: MockDocumentReference is imported first to avoid hoisting issues with Jest mocks
 import { MockDocumentReference } from "tests/utils/mocks";
 import * as admin from "firebase-admin";
 import { DocumentReference, getFirestore } from "firebase-admin/firestore";

@@ -54,11 +54,11 @@ export function parseNestedDocumentReferenceToSimpleObject(documentData: Documen
     } 
     // Check if the value is an array
     else if (Array.isArray(parsedData[key])) {
-      parsedData[key] = parsedData[key].map((item: any) => {
+      parsedData[key] = parsedData[key].map((item: unknown) => {
         if (isDocumentReference(item)) {
-          return parseDocumentReferenceToSimpleObject(item);
+          return parseDocumentReferenceToSimpleObject(item as DocumentReference);
         }
-        return parseNestedDocumentReferenceToSimpleObject(item);
+        return parseNestedDocumentReferenceToSimpleObject(item as DocumentData);
       });
     }
     // Check if the value is an object
