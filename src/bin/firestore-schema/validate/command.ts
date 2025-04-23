@@ -13,6 +13,7 @@ import {
   getCredentialsFromFile,
   initFirestore,
   getCollectionDocuments,
+  getAllCollectionNames,
 } from "src/lib/utils/firestore";
 import { Ajv, ErrorObject, Schema } from "ajv";
 import { mapItemSchemaToCollectionSchema, mergeValidationErrors } from "src/lib/schema/validate";
@@ -32,7 +33,42 @@ export async function executeAsyncValidateCommand(
   });
 
   const allErrors: Record<string, ErrorObject[]> = {};
-  for (const collectionName of params.collectionNames) {
+  
+  // Get collections based on params
+  let collectionsToValidate = params.collectionNames || [];
+  if (params.useAllCollections) {
+    params.verbose && console.log("Fetching all collections from database");
+    collectionsToValidate = await getAllCollectionNames(firestore);
+    params.verbose && console.log(`Found ${collectionsToValidate.length} collections: ${collectionsToValidate.join(', ')}`);
+    
+    // Filter collections that have corresponding schema files
+    if (isPathFolder(params.schemaPath)) {
+      const validCollections = [];
+      for (const collectionName of collectionsToValidate) {
+        const schemaPath = `${params.schemaPath}/${collectionName}.json`;
+        if (fs.existsSync(schemaPath)) {
+          validCollections.push(collectionName);
+        } else {
+          params.verbose && console.warn(colors.yellow(`Schema file not found for collection ${collectionName}, skipping.`));
+        }
+      }
+      
+      if (validCollections.length === 0) {
+        throw new Error(colors.red("No schema files found for any collections in the database."));
+      }
+      
+      collectionsToValidate = validCollections;
+      params.verbose && console.log(`Validating ${collectionsToValidate.length} collections with schema files.`);
+    } else {
+      // When schema path is not a folder but using all collections flag
+      console.warn(
+        colors.bold(colors.yellow("Warning: ")) +
+        "Using --all-collections with a single schema file will apply the same schema to all collections."
+      );
+    }
+  }
+
+  for (const collectionName of collectionsToValidate) {
     params.verbose &&
       console.log(`Importing data for collection: ${collectionName}`);
     const collectionData: unknown[] = await getCollectionDocuments(

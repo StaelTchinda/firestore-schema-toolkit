@@ -42,6 +42,7 @@ describe("Validate Command", () => {
   };
   const mockCompile = jest.fn();
   const mockAjvInstance = { compile: mockCompile };
+  const mockAllCollectionNames = ["users", "posts", "comments", "likes"];
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -66,6 +67,10 @@ describe("Validate Command", () => {
     );
     (firestoreUtils.getCollectionDocuments as jest.Mock).mockResolvedValue(
       mockCollectionData
+    );
+
+    (firestoreUtils.getAllCollectionNames as jest.Mock).mockResolvedValue(
+      mockAllCollectionNames
     );
 
     // Mock file operations
@@ -101,7 +106,19 @@ describe("Validate Command", () => {
     });
   });
 
-  test("retrieves collection data for each collection", async () => {
+  test("get all collection names when allCollections flag is set", async () => {
+    (parseParams as jest.Mock).mockReturnValue({
+      accountCredentialsPath: "/path/to/credentials.json",
+      schemaPath: "/schema/path",
+      outputPath: "/output/path",
+      useAllCollections: true,
+    });
+
+    await executeAsyncValidateCommand(mockProgram);
+    expect(firestoreUtils.getAllCollectionNames).toHaveBeenCalled();
+  });
+
+  test("retrieves collection data for each collection, when allCollections flag is not set", async () => {
     const params = {
       accountCredentialsPath: "/path/to/credentials.json",
       collectionNames: ["users", "posts"],
@@ -125,6 +142,38 @@ describe("Validate Command", () => {
       "posts"
     );
     expect(firestoreUtils.getCollectionDocuments).toHaveBeenCalledTimes(2);
+  });
+
+  test("retrieves collection data for each collection, when allCollections flag is set", async () => {
+    (parseParams as jest.Mock).mockReturnValue({
+      accountCredentialsPath: "/path/to/credentials.json",
+      schemaPath: "/schema/path",
+      outputPath: "/output/path",
+      useAllCollections: true,
+    });
+
+    await executeAsyncValidateCommand(mockProgram);
+    expect(firestoreUtils.getCollectionDocuments).toHaveBeenCalledTimes(4);
+    expect(firestoreUtils.getCollectionDocuments).toHaveBeenNthCalledWith(
+      1,
+      mockFirestore,
+      mockAllCollectionNames[0]
+    );
+    expect(firestoreUtils.getCollectionDocuments).toHaveBeenNthCalledWith(
+      2,
+      mockFirestore,
+      mockAllCollectionNames[1]
+    );
+    expect(firestoreUtils.getCollectionDocuments).toHaveBeenNthCalledWith(
+      3,
+      mockFirestore,
+      mockAllCollectionNames[2]
+    );
+    expect(firestoreUtils.getCollectionDocuments).toHaveBeenNthCalledWith(
+      4,
+      mockFirestore,
+      mockAllCollectionNames[3]
+    );
   });
 
   test("loads schema file with correct path when schemaPath is a folder", async () => {
@@ -257,18 +306,19 @@ describe("Validate Command", () => {
     let consoleLogSpy: jest.Spied<FunctionLike>;
     let consoleErrorSpy: jest.Spied<FunctionLike>;
 
-      beforeEach(() => {
-        jest.clearAllMocks();
-    
-        // Setup console spies
-        consoleLogSpy = jest.spyOn(console, 'log');
-        consoleErrorSpy = jest.spyOn(console, 'error');
-      });
+    beforeEach(() => {
+      jest.clearAllMocks();
+
+      // Setup console spies
+      consoleLogSpy = jest.spyOn(console, "log");
+      consoleErrorSpy = jest.spyOn(console, "error");
+    });
 
     test("logs success message when validation succeeds", async () => {
       await executeAsyncValidateCommand(mockProgram);
       expect(consoleLogSpy).toHaveBeenCalledWith(
-        colors.bold(colors.green("Validation succeeded")) + " for collection users."
+        colors.bold(colors.green("Validation succeeded")) +
+          " for collection users."
       );
     });
 
@@ -279,26 +329,30 @@ describe("Validate Command", () => {
           keyword: "type",
           message: "must be string",
           schemaPath: "#/properties/name/type",
-          params: { type: "string" }
+          params: { type: "string" },
         },
         {
           instancePath: "/1/name",
           keyword: "type",
           message: "must be string",
           schemaPath: "#/properties/name/type",
-          params: { type: "string" }
+          params: { type: "string" },
         },
       ];
       const validateFn = jest
         .fn()
-        .mockReturnValue(false) as jest.Mock<ValidateFunction> & ValidateFunction;
+        .mockReturnValue(false) as jest.Mock<ValidateFunction> &
+        ValidateFunction;
       validateFn.errors = mockErrors;
       mockCompile.mockReturnValue(validateFn);
 
       await executeAsyncValidateCommand(mockProgram);
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringContaining(colors.bold(colors.red("Validation failed")) + " for collection users: found 2 errors.")
+        expect.stringContaining(
+          colors.bold(colors.red("Validation failed")) +
+            " for collection users: found 2 errors."
+        )
       );
     });
   });

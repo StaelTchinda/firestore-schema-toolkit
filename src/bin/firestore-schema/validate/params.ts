@@ -23,6 +23,13 @@ export const validateCommandOptions: { [key: string]: OptionParams } = {
     args: "<collection1,collection2,...>",
     description: "comma separated list of collection names to export",
   },
+
+  useAllCollections: {
+    shortKey: "A",
+    key: "allCollections",
+    args: "",
+    description: "use all collections from the database, ignores collections option",
+  },
   outputPath: {
     shortKey: "o",
     key: "output",
@@ -62,6 +69,8 @@ export function parseParams(program: Command): FirestoreSchemaValidateParams {
       ?.split(",")
       .map((collectionName: string) => collectionName.trim()) || [];
 
+  const useAllCollections = Boolean(options[validateCommandOptions.useAllCollections.key]);
+
   const outputPath = options[validateCommandOptions.outputPath.key];
 
   const schemaPath = options[validateCommandOptions.schemaPath.key];
@@ -73,6 +82,7 @@ export function parseParams(program: Command): FirestoreSchemaValidateParams {
   return {
     accountCredentialsPath,
     collectionNames,
+    useAllCollections,
     outputPath,
     schemaPath,
     verbose,
@@ -99,14 +109,25 @@ export function validateParams(
   }
 
   if (
-    !commandParams.collectionNames ||
-    commandParams.collectionNames.length === 0
+    !commandParams.useAllCollections &&
+    (!commandParams.collectionNames || commandParams.collectionNames.length === 0)
   ) {
     throw new Error(
       colors.bold(colors.red("Missing: ")) +
         colors.bold(validateCommandOptions.collectionNames.key) +
         " - " +
-        validateCommandOptions.collectionNames.description
+        validateCommandOptions.collectionNames.description +
+        " or use --" + validateCommandOptions.useAllCollections.key
+    );
+  }
+
+  if (commandParams.useAllCollections && 
+      commandParams.collectionNames && 
+      commandParams.collectionNames.length > 0) {
+    console.warn(
+      colors.bold(colors.yellow("Warning: ")) +
+      `Both ${validateCommandOptions.useAllCollections.key} and ${validateCommandOptions.collectionNames.key} are set. ` +
+      `The ${validateCommandOptions.collectionNames.key} parameter will be ignored.`
     );
   }
 
@@ -129,6 +150,7 @@ export function validateParams(
         validateCommandOptions.outputPath.description
     );
   } else if (
+    commandParams.collectionNames && 
     commandParams.collectionNames.length > 1 &&
     !isPathFolder(commandParams.schemaPath)
   ) {
