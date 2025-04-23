@@ -33,14 +33,6 @@ export const migrateCommandOptions: { [key: string]: OptionParams } = {
     description: `ID of the database to migrate data from and to. Defaults to '${defaultDatabaseId}' if missing.`,
     defaultValue: defaultDatabaseId,
   },
-  /*
-  schemaPath: {
-    shortKey: "s",
-    key: "schema",
-    args: "<path>",
-    description: "path to the JSON schema file to migrate the data against",
-  },
-  */
   verbose: {
     shortKey: "v",
     key: "verbose",
@@ -65,8 +57,6 @@ export function parseParams(program: Command): FirestoreMigrateParams {
 
   const scriptPath = options[migrateCommandOptions.scriptPath.key];
 
-  // const schemaPath = options[migrateCommandOptions.schemaPath.key];
-
   const databaseId =
     options[migrateCommandOptions.databaseId.key] ||
     migrateCommandOptions.databaseId.defaultValue;
@@ -78,7 +68,6 @@ export function parseParams(program: Command): FirestoreMigrateParams {
   return {
     accountCredentialsPath,
     scriptPath,
-    // schemaPath,
     databaseId,
     verbose,
     summarize,

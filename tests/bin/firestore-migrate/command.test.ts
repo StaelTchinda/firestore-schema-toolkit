@@ -33,8 +33,7 @@ import * as Enquirer from 'enquirer';
 
 // Create mock migration modules
 const mockMigration1Path = '/path/to/migration.ts';
-// const mockMigration2Path = '/path/to/migration1.ts';
-// const mockMigration3Path = '/path/to/migration2.ts';
+
 
 const mockMigrationFunction = jest.fn().mockResolvedValue({});
 const mockMigrationPreviewFunction = jest.fn();
@@ -44,17 +43,8 @@ const mockMigrationFile = {
   preview: mockMigrationPreviewFunction
 };
 
-// const mockMigrationFunction2 = jest.fn().mockResolvedValue({});
-// const mockMigrationFile2 = {
-//   description: 'Second migration',
-//   up: mockMigrationFunction2,
-//   preview: jest.fn()
-// };
-
 // Mock specific migration file paths
 jest.mock('/path/to/migration.ts', () => mockMigrationFile, { virtual: true });
-// jest.mock('/path/to/migration1.ts', () => mockMigrationFile, { virtual: true });
-// jest.mock('/path/to/migration2.ts', () => mockMigrationFile2, { virtual: true });
 
 describe('Migrate Command', () => {
   let mockProgram: Command;
@@ -186,36 +176,6 @@ describe('Migrate Command', () => {
     expect(mockMigrationFunction).toHaveBeenCalledWith(mockFirestore);
   });
 
-// This test only makes sense when changes has been passed instead of a migrate function
-/*
-  test('applies batch operations when applyChanges is true and user confirms', async () => {
-    (parseParams as jest.Mock).mockReturnValue({
-      accountCredentialsPath: '/path/to/credentials.json',
-      scriptPath: mockMigration1Path,
-      databaseId: 'test-database',
-      applyChanges: true,
-      verbose: true,
-      summarize: false
-    });
-
-    // Mock user confirming the migration
-    (Enquirer.prompt as jest.Mock).mockResolvedValue({ confirm: true });
-
-    const mockCollection = {
-      doc: jest.fn().mockReturnValue({ id: 'doc1' })
-    };
-
-    (mockFirestore.collection as jest.Mock).mockReturnValue(mockCollection);
-
-    await executeAsyncMigrateCommand(mockProgram);
-    
-    expect(mockMigrationPreviewFunction).toHaveBeenCalledWith(mockFirestore);
-    expect(mockFirestore.collection).toHaveBeenCalledWith('users');
-    expect(mockCollection.doc).toHaveBeenCalledWith('doc1');
-    expect(mockBatch.update).toHaveBeenCalled();
-    expect(mockBatch.commit).toHaveBeenCalled();
-  });
-*/
   test('only previews changes without applying when applyChanges is false', async () => {
     (parseParams as jest.Mock).mockReturnValue({
       accountCredentialsPath: '/path/to/credentials.json',
