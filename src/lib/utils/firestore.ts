@@ -41,7 +41,7 @@ export async function initFirestore({
 }
 
 export async function getCollectionDocuments(
-  firestore: FirebaseFirestore.Firestore,
+  firestore: Firestore,
   collectionName: string
 ): Promise<DocumentData[]> {
   const snapshot = await firestore.collection(collectionName).get();
