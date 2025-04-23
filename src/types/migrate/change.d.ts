@@ -28,7 +28,7 @@ export interface PreviewChangeSummaryGroup {
 
 export interface AttributeChangeTemplate<
   DocumentType extends DocumentData = DocumentData,
-  AttributeType = any
+  AttributeType = unknown
 > {
   path: string; // Path to the attribute (e.g., "user.address.city")
   operation: ChangeOperationType;

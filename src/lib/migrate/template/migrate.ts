@@ -16,7 +16,7 @@ export async function executeDocumentDelete(
   return async (firestore) => {
     const collection = firestore.collection(template.collectionPath);
     const docs = await collection.get();
-    const _filter = template.filter || (() => true);
+    const _filter = template.filter || ((): boolean => true);
     const batch = firestore.batch();
     let deletedCount = 0;
 
@@ -46,7 +46,7 @@ export async function executeDocumentUpdate(
   return async (firestore) => {
     const collection = firestore.collection(template.collectionPath);
     const docs = await collection.get();
-    const _filter = template.filter || (() => true);
+    const _filter = template.filter || ((): boolean => true);
     const batch = firestore.batch();
     let updatedCount = 0;
 

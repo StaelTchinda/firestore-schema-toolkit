@@ -60,7 +60,7 @@ describe('Migration Functions', () => {
     };
     
     // Mock the attribute change builder to return some sample changes
-    (utils.getAttributeChangeBuilder as jest.Mock).mockImplementation((change) => async (data: DocumentData): Promise<any> => {
+    (utils.getAttributeChangeBuilder as jest.Mock).mockImplementation((change) => async (data: DocumentData): Promise<unknown> => {
       if (change.operation === ChangeOperationType.CREATE) {
         return {
           operation: ChangeOperationType.CREATE,
@@ -249,7 +249,7 @@ describe('Migration Functions', () => {
 
     it('should throw error for invalid operation type', async () => {
       const template = {
-        operation: 'INVALID' as any,
+        operation: 'INVALID',
         collectionPath: 'test-collection'
       };
 

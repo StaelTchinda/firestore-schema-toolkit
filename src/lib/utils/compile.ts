@@ -4,7 +4,7 @@ import * as fs from "fs/promises";
 
 const logger = console;
 
-export async function registerTsCompiler(tsconfigPath?: string) {
+export async function registerTsCompiler(tsconfigPath?: string): Promise<void> {
   const defaultTSConfig = {
     compilerOptions: {
       noImplicitAny: false,

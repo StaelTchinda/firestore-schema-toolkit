@@ -458,7 +458,7 @@ describe("buildSinglePreviewFunction", () => {
 
   it("should throw error for invalid operation type", async () => {
     const template: PreviewChangeTemplate = {
-      operation: "INVALID" as any,
+      operation: "INVALID",
       collectionPath: "users",
       changes: [],
     };

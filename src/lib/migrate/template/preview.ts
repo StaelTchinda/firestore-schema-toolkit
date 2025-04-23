@@ -53,7 +53,7 @@ export async function buildDocumentUpdatePreview(
     const collection = firestore.collection(template.collectionPath);
     const docs = await collection.get();
 
-    const _filter = template.filter || (() => true);
+    const _filter = template.filter || ((): boolean => true);
 
     const changes: PreviewChange[] = [];
     for (const doc of docs.docs) {
@@ -102,7 +102,7 @@ export async function buildDocumentCreatePreview(
     const collection = firestore.collection(template.collectionPath);
     const docs = await collection.get();
 
-    const _filter = template.filter || (() => true);
+    const _filter = template.filter || ((): boolean => true);
 
     const changes: PreviewChange[] = [];
     for (const doc of docs.docs) {
