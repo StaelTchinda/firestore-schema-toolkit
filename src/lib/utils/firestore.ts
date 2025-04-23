@@ -3,6 +3,7 @@ import {
   getFirestore,
   Firestore,
   DocumentData,
+  DocumentReference
 } from "firebase-admin/firestore";
 import { getJsonFromFile } from "src/lib/utils/file";
 
