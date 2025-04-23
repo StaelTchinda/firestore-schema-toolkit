@@ -1,5 +1,10 @@
 import * as admin from "firebase-admin";
-import { getFirestore, Firestore, DocumentData, DocumentReference } from "firebase-admin/firestore";
+import {
+  getFirestore,
+  Firestore,
+  DocumentData,
+  DocumentReference
+} from "firebase-admin/firestore";
 import { getJsonFromFile } from "src/lib/utils/file";
 
 // TODO: Add the necessary attributes and move it to another file.
@@ -36,7 +41,10 @@ export async function initFirestore({
   }
 }
 
-export async function getCollectionDocuments(firestore: Firestore, collectionName: string): Promise<DocumentData[]> {
+export async function getCollectionDocuments(
+  firestore: Firestore,
+  collectionName: string
+): Promise<DocumentData[]> {
   const snapshot = await firestore.collection(collectionName).get();
   const collectionData: DocumentData[] = [];
   snapshot.forEach((doc) => {
