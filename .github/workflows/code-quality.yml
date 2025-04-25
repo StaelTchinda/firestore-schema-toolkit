@@ -31,3 +31,7 @@ jobs:
       - name: Check for duplicate code
         run: npm run find-duplicates
         if: always()
+
+      - name: Format code with Prettier
+        run: npm run format
+        if: always()
